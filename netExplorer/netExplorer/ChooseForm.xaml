@@ -1,0 +1,15 @@
+﻿<Window x:Class="netExplorer.ChooseForm"
+        x:Name="StartWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:netExplorer"
+        mc:Ignorable="d"
+        Title="Start Explorer" Height="132" Width="314" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow">
+    <Grid x:Name="StartGrid" Background="#FF534848">
+        <Label x:Name="StartLable" Content="Выберите роль вашего компьютера:" HorizontalAlignment="Center" Margin="25,15,25,0" VerticalAlignment="Top"  Foreground="white"/>
+        <Button x:Name="ChooseServer" Content="Сервер" HorizontalAlignment="Left" Margin="25,0,0,10" VerticalAlignment="Bottom" Width="75" Foreground="White" Click="ChooseServer_Click"/>
+        <Button x:Name="ChooseClient" Content="Клиент" HorizontalAlignment="Right" Margin="0,0,25,10" VerticalAlignment="Bottom" Width="75" Foreground="White" Click="ChooseClient_Click"/>
+    </Grid>
+</Window>

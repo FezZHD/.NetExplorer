@@ -1,0 +1,10 @@
+﻿<Window x:Name="MainForm" x:Class="netExplorer.MainServerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:netExplorer"
+        mc:Ignorable="d"
+        Title="Net Explorer" Height="372" Width="674">
+    <Grid x:Name="MainGrid"/>
+</Window>
