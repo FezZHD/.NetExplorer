@@ -7,9 +7,9 @@
         mc:Ignorable="d"
         Title="Net Explorer Server" MinWidth="600" MinHeight="270" Height="270" Width="600" MaxWidth="1000" MaxHeight="500" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
     <Grid x:Name="MainGrid" Margin="0" ScrollViewer.VerticalScrollBarVisibility="Disabled">
-        <Button Name="ChooseRootButton" Content="Корень сервера" HorizontalAlignment="Right" VerticalAlignment="Top" Width="139" Height="45"/>
-        <Label Name="RootPathLable" Content="Ваш путь" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.561,0.321"/>
-        <TextBox Margin="0,45,0,50" TextWrapping="Wrap" MinWidth="600" MinHeight="130" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" IsReadOnly="True" Cursor="" SelectionOpacity="0" Focusable="False" IsTabStop="False" AllowDrop="False" IsHitTestVisible="False"/>
-        <Button Name="ServerStartButton" Content="Запустить сервер" VerticalAlignment="Bottom" ScrollViewer.VerticalScrollBarVisibility="Disabled" Padding="0" Height="50" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" MinWidth="600" MinHeight="50" Grid.Row="1"/>
+        <Button Name="ChooseRootButton" Content="Корень сервера" HorizontalAlignment="Right" VerticalAlignment="Top" Width="139" Height="45" Click="ChooseRootButton_Click"/>
+        <Label Name="RootPathLable" Content="Ваш путь" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Background="Transparent" Foreground="Black" Padding="5" VerticalContentAlignment="Center"/>
+        <TextBox Name="LogBox" Margin="0,45,0,50" TextWrapping="Wrap" MinWidth="600" MinHeight="130" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" IsReadOnly="True" Cursor="" SelectionOpacity="0" Focusable="False" IsTabStop="False" AllowDrop="False" IsHitTestVisible="False"/>
+        <Button Name="ServerStartButton" Content="Запустить сервер" VerticalAlignment="Bottom" ScrollViewer.VerticalScrollBarVisibility="Disabled" Padding="0" Height="50" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" MinWidth="600" MinHeight="50" Click="ServerStartButton_Click"/>
     </Grid>
 </Window>
