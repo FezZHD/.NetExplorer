@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,7 +15,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Forms;
-using MessageBox = System.Windows.MessageBox;
 
 
 namespace netExplorer
@@ -28,7 +29,9 @@ namespace netExplorer
             InitializeComponent();
         }
 
-        private bool IsServerEnabled = false;
+        const int InputPort = 21;
+        public TcpListener InputListener;
+        private bool _isServerEnabled;
         public string SelectedPath { get; set; }
 
         private void ChooseRootButton_Click(object sender, RoutedEventArgs e)
@@ -44,29 +47,26 @@ namespace netExplorer
 
             if (dialogResult == System.Windows.Forms.DialogResult.OK)
             {
-                try
-                {
                     SelectedPath = chooseFolderDialog.SelectedPath;
                     RootPathLable.Content = SelectedPath;
-                }
-                catch (Exception)
-                {
-                    MessageBox.Show(e.ToString());
-                }
             }
         }
 
         private void ServerStartButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!IsServerEnabled)
+            if (!_isServerEnabled)
             {
                 ServerStartButton.Content = @"Остановить сервер";
-                IsEnabled = true;
+                _isServerEnabled = true;
+                InputListener = new TcpListener(IPAddress.Any, InputPort);
+                InputListener.Start();
+                TcpClient tcpClient = InputListener.AcceptTcpClient();
             }
             else
             {
                 ServerStartButton.Content = @"Запустить сервер";
-                IsEnabled = false;
+                _isServerEnabled = false;
+                InputListener.Stop();
             }
         }
     }
