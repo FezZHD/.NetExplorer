@@ -10,12 +10,12 @@ namespace NetExplorerServer
     class Program
     {
         [STAThread]
-        static void Main(string[] args)
+        static void Main()
         {
             FolderBrowserDialog chooseBrowserDialog = new FolderBrowserDialog
             {
                 Description = @"Выберите корневую папку",
-                RootFolder = Environment.SpecialFolder.MyComputer
+                RootFolder = Environment.SpecialFolder.MyComputer //do not work on win 10
             };
             if (chooseBrowserDialog.ShowDialog() == DialogResult.OK)
             {

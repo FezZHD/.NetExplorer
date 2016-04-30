@@ -11,8 +11,8 @@ namespace NetExplorerServer
 {
     internal class ServerStart
     {
-        public string DefaultRoot { get; set; }
-        private const int Port = 21;
+        public static string DefaultRoot { get; set; }
+        public static int Port = 21;
         private TcpListener _serverListiner;
 
 

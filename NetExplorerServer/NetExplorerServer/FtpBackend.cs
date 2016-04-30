@@ -16,6 +16,7 @@ namespace NetExplorerServer
         private StreamReader _commadStreamReader;
         private ushort _clientPort;
         private string _ipAdress;
+        private DirectoriesBackend _directoriesBackend;
 
         public FtpBackend(TcpClient commandClient)
         {
@@ -23,6 +24,7 @@ namespace NetExplorerServer
             _commandNetworkStream = _commandClient.GetStream();
             _commandStreamWriter = new StreamWriter(_commandNetworkStream);
             _commadStreamReader = new StreamReader(_commandNetworkStream);
+            _directoriesBackend = new DirectoriesBackend();;
         }
 
         public void HandleFtp()
@@ -31,9 +33,9 @@ namespace NetExplorerServer
             Console.WriteLine("220 OK");
             _commandStreamWriter.Flush();
 
-            string commandLine;
             try
             {
+                string commandLine;
                 while (!string.IsNullOrEmpty(commandLine = _commadStreamReader.ReadLine()))
                 {
                     string commandResponse = null;
@@ -57,6 +59,12 @@ namespace NetExplorerServer
                             case "QUIT":
                                 CloseConnetcion();
                                 break;
+                            case "PASS":
+                                commandResponse = HandlePass();
+                                break;
+                            case "TYPE":
+                                commandResponse = HandleType(arguments);
+                                break;
                             default:
                                 commandResponse = "502 command not implemented\n";
                                 break;
@@ -70,7 +78,7 @@ namespace NetExplorerServer
                     else
                     {
                         _commandStreamWriter.WriteLine(commandResponse);
-                        Console.WriteLine("{0} : {1} ",realCommand, commandResponse);
+                        Console.WriteLine("{0} : {1} ", realCommand, commandResponse);
                         _commandStreamWriter.Flush();
                         if(commandResponse.StartsWith("221"))
                         {
@@ -98,6 +106,27 @@ namespace NetExplorerServer
         private void CloseConnetcion()
         {
             _commandNetworkStream.Close();
+        }
+
+        private string HandlePass()
+        {
+            return "230 login success";
+        }
+
+        private string HandleType(string argument)
+        {
+            string response;
+            switch (argument)
+            {
+                case "I":
+                case "A":
+                    response = "220 OK\n";
+                    break;
+                default:
+                    response = "501 Unknow argument";
+                    break;
+            }
+            return response;
         }
     }
 }
