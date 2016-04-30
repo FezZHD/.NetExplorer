@@ -22,6 +22,7 @@ namespace NetExplorerServer
             RootDirectory = ServerStart.DefaultRoot;
         }
 
+
         public void GetFile(string name, NetworkStream stream)
         {
             string fileName = CurrentDirectory + "\\" + name;
@@ -34,6 +35,56 @@ namespace NetExplorerServer
             }
             currentFile.Close();
             stream.Close();
+        }
+
+
+        public void SendFile(string path, NetworkStream stream)
+        {
+            string filePath = CurrentDirectory + "\\" + path;
+
+            if (File.Exists(filePath))
+            {
+                FileStream sendFileStream = new FileStream(filePath,FileMode.Open, FileAccess.Read);
+                byte[] fileBuffer = new byte[BufferSize];
+                int count;
+                while ((count = sendFileStream.Read(fileBuffer, 0, fileBuffer.Length)) > 0)
+                {
+                    stream.Write(fileBuffer, 0 ,count);
+                }
+                sendFileStream.Close();
+            }
+            stream.Close();
+        }
+
+        public void GetList(NetworkStream stream)
+        {
+            _streamWriter = new StreamWriter(stream, Encoding.UTF8)
+            {
+                NewLine = "\n"
+            };
+
+            _streamWriter.WriteLine("drwxrwxrwx 1   owner   group   {0,8}   {1}", "4096", "..");
+            IEnumerable<string> directoriesEnumerable = Directory.EnumerateDirectories(CurrentDirectory);
+            foreach (string directory in directoriesEnumerable)
+            {
+                DirectoryInfo currentDirectoryInfo = new DirectoryInfo(directory);
+                string resultLine = string.Format("drwxrwxrwx 1   owner   group   {0,8}   {1}", "4096",
+                    currentDirectoryInfo.Name);
+                _streamWriter.WriteLine(resultLine);
+                _streamWriter.Flush();
+            }
+
+            IEnumerable<string> filesEnumerable = Directory.EnumerateFiles(CurrentDirectory);
+            foreach (string file in filesEnumerable)
+            {
+                FileInfo currentFileInfo = new FileInfo(file);
+
+                string resultString = String.Format("-rw-r--r-- 1   owner   group   {0,8} {1}", currentFileInfo.Length,
+                    currentFileInfo.Name);
+                _streamWriter.WriteLine(resultString);
+                _streamWriter.Flush();
+            }
+            _streamWriter.Close();
         }
     }
 }

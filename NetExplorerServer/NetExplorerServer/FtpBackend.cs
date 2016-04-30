@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
@@ -127,6 +128,18 @@ namespace NetExplorerServer
                     break;
             }
             return response;
+        }
+
+        private string HandlePort(string argument)
+        {
+            string[] ipEndPoint = argument.Split(',');
+            _ipAdress = ipEndPoint[0] + '.' + ipEndPoint[1] + '.' + ipEndPoint[2] + '.' + ipEndPoint[3];
+            byte[] portByte =
+            {
+                Convert.ToByte(ipEndPoint[4]), Convert.ToByte((ipEndPoint[5]))
+            };
+            _clientPort = (ushort) (((ushort) portByte[0] << 8) | portByte[1]);
+            return "200 active";
         }
     }
 }
