@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
+
 
 namespace NetExplorerServer
 {
     class DirectoriesBackend
     {
-        private DirectoryInfo _directoryInfo;
         private StreamWriter _streamWriter;
         private const int BufferSize = 4096;
-        private string CurrentDirectory { get; set; }
+        public string CurrentDirectory { get; set; }
         private string RootDirectory { get; set; }
+        private readonly Stack<string> _rootStack = new Stack<string>(); 
 
         public DirectoriesBackend()
         {
@@ -23,37 +22,68 @@ namespace NetExplorerServer
         }
 
 
-        public void GetFile(string name, NetworkStream stream)
+        public void GetFile()
         {
-            string fileName = CurrentDirectory + "\\" + name;
+            string fileName = CurrentDirectory + "\\" + FtpBackend.TempPath;
             FileStream currentFile = new FileStream(fileName, FileMode.Create, FileAccess.Write);
             byte[] buffer = new byte[BufferSize];
             int count;
-            while ((count = stream.Read(buffer, 0, buffer.Length)) > 0)
+            lock (FtpBackend.DataNetworkStream)
             {
-                currentFile.Write(buffer, 0, count);
+                try
+                {
+                    while ((count = FtpBackend.DataNetworkStream.Read(buffer, 0, buffer.Length)) > 0 &&
+                           (FtpBackend.DataNetworkStream != null))
+                    {
+                        currentFile.Write(buffer, 0, count);
+                    }
+                }
+                catch (IOException)
+                {
+                    currentFile.Close();
+                    return;
+                }
+            }
+            if (FtpBackend.DataNetworkStream == null)
+            {
+                return;
             }
             currentFile.Close();
-            stream.Close();
+            FtpBackend.DataNetworkStream.Close();
         }
 
 
-        public void SendFile(string path, NetworkStream stream)
+        public void SendFile()
         {
-            string filePath = CurrentDirectory + "\\" + path;
+            string filePath = CurrentDirectory + "\\" + FtpBackend.TempPath;
 
             if (File.Exists(filePath))
             {
                 FileStream sendFileStream = new FileStream(filePath,FileMode.Open, FileAccess.Read);
                 byte[] fileBuffer = new byte[BufferSize];
                 int count;
-                while ((count = sendFileStream.Read(fileBuffer, 0, fileBuffer.Length)) > 0)
+                lock (FtpBackend.DataNetworkStream)
                 {
-                    stream.Write(fileBuffer, 0 ,count);
+                    while ((count = sendFileStream.Read(fileBuffer, 0, fileBuffer.Length)) > 0 && (FtpBackend.DataNetworkStream != null))
+                    {
+                        try
+                        {
+                            FtpBackend.DataNetworkStream.Write(fileBuffer, 0, count);
+                        }
+                        catch (IOException)
+                        {
+                            sendFileStream.Close();
+                            return;
+                        }
+                    }
                 }
                 sendFileStream.Close();
+                if (FtpBackend.DataNetworkStream == null)
+                {
+                    return;
+                }
             }
-            stream.Close();
+            FtpBackend.DataNetworkStream.Close();
         }
 
         public void GetList(NetworkStream stream)
@@ -62,7 +92,7 @@ namespace NetExplorerServer
             {
                 NewLine = "\n"
             };
-
+            
             _streamWriter.WriteLine("drwxrwxrwx 1   owner   group   {0,8}   {1}", "4096", "..");
             IEnumerable<string> directoriesEnumerable = Directory.EnumerateDirectories(CurrentDirectory);
             foreach (string directory in directoriesEnumerable)
@@ -85,6 +115,62 @@ namespace NetExplorerServer
                 _streamWriter.Flush();
             }
             _streamWriter.Close();
+        }
+
+        public void ChangeDirectory(string path)
+        {
+            string newPath = null;
+            if (path.Length >= CurrentDirectory.Length)
+            {
+                if (path.Substring(0, CurrentDirectory.Length).Equals(CurrentDirectory))
+                {
+                    newPath = path;
+                }
+            }
+            if (newPath == null)
+            {
+                newPath = CurrentDirectory + "\\" + path;
+            }
+            _rootStack.Push(CurrentDirectory);
+            CurrentDirectory = newPath;
+        }
+
+        public void HandleCdup()
+        {
+            try
+            {
+                CurrentDirectory = _rootStack.Pop();
+            }
+            catch (InvalidOperationException)
+            {
+                Console.WriteLine("Попытка переключиться на дирректорию выше провальна, т.к вы находитесь в корневой директории");
+            }
+        }
+
+        public void DeleteDirectory(string path)
+        {
+            string deltebleDirectory = CurrentDirectory + "\\" + path;
+            if (Directory.Exists(deltebleDirectory))
+            {
+               DirectoryInfo ourDirectory = new DirectoryInfo(deltebleDirectory);
+                ourDirectory.Delete(true);
+            }
+        }
+
+        public void CreateDirectory(string path)
+        {
+            string newPath = CurrentDirectory + "\\" + path;
+            Directory.CreateDirectory(newPath);
+        }
+
+        public void DeleteFile(string path)
+        {
+            string deletableFile = CurrentDirectory + "\\" + path;
+            if (File.Exists(deletableFile))
+            {
+                FileInfo ourFile = new FileInfo(deletableFile);
+                ourFile.Delete();
+            }
         }
     }
 }

@@ -1,23 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace NetExplorerServer
 {
     internal class FtpBackend
     {
         private TcpClient _commandClient, _dataClient;
-        private NetworkStream _commandNetworkStream, _dataNetworkStream;
+        private NetworkStream _commandNetworkStream;
+        public static NetworkStream DataNetworkStream;
         private StreamWriter _commandStreamWriter;
         private StreamReader _commadStreamReader;
         private ushort _clientPort;
         private string _ipAdress;
         private DirectoriesBackend _directoriesBackend;
+        private Thread _fileThread;
+        public static string TempPath;
 
         public FtpBackend(TcpClient commandClient)
         {
@@ -25,7 +24,7 @@ namespace NetExplorerServer
             _commandNetworkStream = _commandClient.GetStream();
             _commandStreamWriter = new StreamWriter(_commandNetworkStream);
             _commadStreamReader = new StreamReader(_commandNetworkStream);
-            _directoriesBackend = new DirectoriesBackend();;
+            _directoriesBackend = new DirectoriesBackend();
         }
 
         public void HandleFtp()
@@ -50,26 +49,59 @@ namespace NetExplorerServer
                         arguments = null;
                         
                     }
-                    if (commandResponse == null)
+                    switch (realCommand)
                     {
-                        switch (realCommand)
-                        {
-                            case "USER":
-                                commandResponse = HandleUser(arguments);
-                                break;
-                            case "QUIT":
-                                CloseConnetcion();
-                                break;
-                            case "PASS":
-                                commandResponse = HandlePass();
-                                break;
-                            case "TYPE":
-                                commandResponse = HandleType(arguments);
-                                break;
-                            default:
-                                commandResponse = "502 command not implemented\n";
-                                break;
-                        }
+                        case "USER":
+                            commandResponse = HandleUser(arguments);
+                            break;
+                        case "QUIT":
+                            CloseConnetcion();
+                            break;
+                        case "PASS":
+                            commandResponse = HandlePass();
+                            break;
+                        case "TYPE":
+                            commandResponse = HandleType(arguments);
+                            break;
+                        case "PWD":
+                            commandResponse = HandlePwd();
+                            break;
+                        case "PORT":
+                            commandResponse = HandlePort(arguments);
+                            break;
+                        case "LIST":
+                            commandResponse = HandleList();
+                            break;
+                        case "CWD":
+                            commandResponse = HandleCwd(arguments);
+                            break;
+                        case "CDUP":
+                            commandResponse = HandleCdup();
+                            break;
+                        case "MKD":
+                            commandResponse = HandleMkd(arguments);
+                            break;
+                        case "RMD":
+                            commandResponse = HandleRmd(arguments);
+                            break;
+                        case "DELE":
+                            commandResponse = HandleDele(arguments);
+                            break;
+                        case "RETR":
+                            commandResponse = HandleRetr(arguments);
+                            break;
+                        case "STOR":
+                            commandResponse = HandleStor(arguments);
+                            break;
+                        case "NOOP":
+                            commandResponse = "200 OK";
+                            break;
+                        case "AROR":
+                            commandResponse = HandleAbor();
+                            break;
+                        default:
+                            commandResponse = "502 command not implemented\n";
+                            break;
                     }
 
                     if ((_commandClient == null) || !_commandClient.Connected)
@@ -81,7 +113,7 @@ namespace NetExplorerServer
                         _commandStreamWriter.WriteLine(commandResponse);
                         Console.WriteLine("{0} : {1} ", realCommand, commandResponse);
                         _commandStreamWriter.Flush();
-                        if(commandResponse.StartsWith("221"))
+                        if(commandResponse != null && commandResponse.StartsWith("221"))
                         {
                             break;
                         }
@@ -91,7 +123,6 @@ namespace NetExplorerServer
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                throw;
             }
         }
 
@@ -138,8 +169,113 @@ namespace NetExplorerServer
             {
                 Convert.ToByte(ipEndPoint[4]), Convert.ToByte((ipEndPoint[5]))
             };
-            _clientPort = (ushort) (((ushort) portByte[0] << 8) | portByte[1]);
+            _clientPort = (ushort) ((portByte[0] << 8) | portByte[1]);
             return "200 active";
+        }
+
+        private string HandlePwd()
+        {
+            if (_directoriesBackend == null)
+            {
+                _directoriesBackend = new DirectoriesBackend();
+            }
+            return "257 \"" + _directoriesBackend.CurrentDirectory + "\" is currentd directory";
+        }
+
+        private string HandleList()
+        {
+            _commandStreamWriter.WriteLine("150 ready to send\n");
+            _commandStreamWriter.Flush();
+            DataNetworkStream = CreateNetworkStream();
+            _directoriesBackend.GetList(DataNetworkStream);
+            return "226 transfer complete";
+        }
+
+        private NetworkStream CreateNetworkStream()
+        {
+            if ((_dataClient != null) && (_dataClient.Connected))
+            {
+                _dataClient.Close();
+            }
+            try
+            {
+                _dataClient = new TcpClient(_ipAdress, _clientPort);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                throw;
+            }
+            return _dataClient.GetStream();
+        }
+
+
+        private string HandleCwd(string argument)
+        {
+            _directoriesBackend.ChangeDirectory(argument);
+            return "250 directiry changed";
+        }
+
+
+        private string HandleCdup()
+        {
+            try
+            {
+                _directoriesBackend.HandleCdup();
+            }
+            catch (Exception)
+            {
+                return "552 Error changing directory";
+            }
+            return "250 directory changed";
+        }
+
+        private string HandleRetr(string path)
+        {
+            TempPath = path;
+            _commandStreamWriter.WriteLine("150 ready to send\n");
+            _commandStreamWriter.Flush();
+            DataNetworkStream = CreateNetworkStream();
+            _fileThread = new Thread(_directoriesBackend.SendFile);
+            _fileThread.Start();
+            return "226 Transfer complited";
+        }
+
+        private string HandleStor(string path)
+        {
+            TempPath = path;
+            _commandStreamWriter.WriteLine("150 ready to recieve\n");
+            _commandStreamWriter.Flush();
+            DataNetworkStream = CreateNetworkStream();
+            _fileThread = new Thread(_directoriesBackend.GetFile);
+            _fileThread.Start();
+            return "226 upload complete";
+        }
+
+        private string HandleAbor()
+        {
+            DataNetworkStream.Close();
+            _fileThread.Abort();
+            return "226 transfer abort";
+        }
+
+        private string HandleDele(string path)
+        {
+            _directoriesBackend.DeleteFile(path);
+            return "250 file deleted";
+        }
+
+
+        private string HandleRmd(string path)
+        {
+            _directoriesBackend.DeleteDirectory(path);
+            return "250 directory deleted";
+        }
+
+        private string HandleMkd(string path)
+        {
+            _directoriesBackend.CreateDirectory(path);
+            return "250 directory created";
         }
     }
 }
