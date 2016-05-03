@@ -12,13 +12,11 @@ namespace NetExplorerServer
         private StreamWriter _streamWriter;
         private const int BufferSize = 4096;
         public string CurrentDirectory { get; set; }
-        private string RootDirectory { get; set; }
         private readonly Stack<string> _rootStack = new Stack<string>(); 
 
         public DirectoriesBackend()
         {
             CurrentDirectory = ServerStart.DefaultRoot;
-            RootDirectory = ServerStart.DefaultRoot;
         }
 
 

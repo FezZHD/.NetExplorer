@@ -7,8 +7,9 @@ namespace NetExplorerServer
 {
     internal class FtpBackend
     {
-        private TcpClient _commandClient, _dataClient;
-        private NetworkStream _commandNetworkStream;
+        private readonly TcpClient _commandClient;
+        private TcpClient   _dataClient;
+        private readonly NetworkStream _commandNetworkStream;
         public static NetworkStream DataNetworkStream;
         private StreamWriter _commandStreamWriter;
         private StreamReader _commadStreamReader;
