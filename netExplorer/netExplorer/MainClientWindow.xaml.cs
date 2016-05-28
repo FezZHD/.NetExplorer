@@ -19,9 +19,26 @@ namespace netExplorer
     /// </summary>
     public partial class MainClientWindow : Window
     {
+        public ProtocolWorkingCLass CurrentProtocol;
+
         public MainClientWindow()
         {
             InitializeComponent();
+        }
+
+        private void EnterButton_Click(object sender, RoutedEventArgs e)
+        {
+             CurrentProtocol = new ProtocolWorkingCLass(Addres.Text,Login.Text,Password.Password);
+             CurrentProtocol.Connect();
+        }
+
+        private void MainWindow_Closed(object sender, EventArgs e)
+        {
+            if(CurrentProtocol.CurrentTcpClient != null)
+            { 
+
+                CurrentProtocol.CurrentTcpClient.Close();
+            }
         }
     }
 }
