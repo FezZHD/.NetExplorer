@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
@@ -20,11 +21,22 @@ namespace NetExplorerServer
         {
             _serverListiner = new TcpListener(IPAddress.Any, Port);
             _serverListiner.Start();
+            TcpClient serverClient = null;
             while (true)
             {
-                TcpClient serverClient = _serverListiner.AcceptTcpClient();
-                FtpBackend ftpBackend = new FtpBackend(serverClient);
-                new Thread(ftpBackend.HandleFtp).Start();
+                try
+                {
+                    serverClient = _serverListiner.AcceptTcpClient();
+                    FtpBackend ftpBackend = new FtpBackend(serverClient);
+                    new Thread(ftpBackend.HandleFtp).Start();
+                }
+                catch (IOException e)
+                {
+                    if (serverClient != null)
+                    {
+                        serverClient.Close();
+                    }
+                }
             }
         }
     }
