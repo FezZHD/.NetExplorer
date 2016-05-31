@@ -11,6 +11,7 @@ namespace NetExplorerServer
     {
         private StreamWriter _streamWriter;
         private const int BufferSize = 4096;
+        public string Response { get; set; }
         public string CurrentDirectory { get; set; }
         private readonly Stack<string> _rootStack = new Stack<string>(); 
 
@@ -20,34 +21,39 @@ namespace NetExplorerServer
         }
 
 
-        public void GetFile()
+        public string GetFile()
         {
+            Response = "";
             string fileName = CurrentDirectory + "\\" + FtpBackend.TempPath;
             FileStream currentFile = new FileStream(fileName, FileMode.Create, FileAccess.Write);
             byte[] buffer = new byte[BufferSize];
             int count;
-            lock (FtpBackend.DataNetworkStream)
+            try
             {
-                try
+                while ((count = FtpBackend.DataNetworkStream.Read(buffer, 0, buffer.Length)) > 0 &&
+                       (FtpBackend.DataNetworkStream != null))
+
                 {
-                    while ((count = FtpBackend.DataNetworkStream.Read(buffer, 0, buffer.Length)) > 0 &&
-                           (FtpBackend.DataNetworkStream != null))
-                    {
-                        currentFile.Write(buffer, 0, count);
-                    }
-                }
-                catch (IOException)
-                {
-                    currentFile.Close();
-                    return;
+                    currentFile.Write(buffer, 0, count);
                 }
             }
+
+            catch (IOException)
+            {
+                return "";
+            }
+            finally
+            {
+                currentFile.Close();
+            }
+            Response = "226 uploading complete";
             if (FtpBackend.DataNetworkStream == null)
             {
-                return;
+                return "";
             }
-            currentFile.Close();
+
             FtpBackend.DataNetworkStream.Close();
+            return Response;
         }
 
 

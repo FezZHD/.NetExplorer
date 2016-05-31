@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading;
@@ -99,7 +101,7 @@ namespace NetExplorerServer
                             commandResponse = HandleRetr(arguments);
                             break;
                         case "STOR":
-                            //commandResponse = HandleStor(arguments);
+                            commandResponse = HandleStor(arguments);
                             //todo: update thread working for stor and retr
                             break;
                         case "NOOP":
@@ -253,15 +255,19 @@ namespace NetExplorerServer
             return "226 Transfer complited";
         }
 
-        private void HandleStor(string path)
+        private string HandleStor(string path)
         {
             TempPath = path;
             _commandStreamWriter.WriteLine("150 ready to recieve\n");
             _commandStreamWriter.Flush();
             DataNetworkStream = CreateNetworkStream();
-            _fileThread = new Thread(_directoriesBackend.GetFile);
+            _fileThread = new Thread(
+                () =>
+                _directoriesBackend.Response = _directoriesBackend.GetFile()
+            );
             _fileThread.Start();
-            //return "226 upload complete";
+            _fileThread.Join();
+            return _directoriesBackend.Response;
         }
 
         private string HandleAbor()
