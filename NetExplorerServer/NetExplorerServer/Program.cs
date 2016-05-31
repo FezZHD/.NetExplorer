@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 namespace NetExplorerServer
@@ -19,6 +20,10 @@ namespace NetExplorerServer
                 Console.WriteLine(@"Ваш корневой каталог - {0}",selectedRoot);
                 ServerStart server = new ServerStart(selectedRoot);
                 server.Start();
+                while (true)
+                {
+                    
+                }
             }
         }
     }

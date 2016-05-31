@@ -30,10 +30,17 @@ namespace NetExplorerServer
 
         public void HandleFtp()
         {
-            _commandStreamWriter.WriteLine("220 OK");
-            Console.WriteLine("220 OK");
-            _commandStreamWriter.Flush();
-
+            try
+            {
+                _commandStreamWriter.WriteLine("220 OK");
+                _commandStreamWriter.Flush();
+                Console.WriteLine("220 OK");
+            }
+            catch (Exception e)
+            {
+                _commandClient.Close();
+                return;
+            }
             try
             {
                 string commandLine;
@@ -92,7 +99,8 @@ namespace NetExplorerServer
                             commandResponse = HandleRetr(arguments);
                             break;
                         case "STOR":
-                            commandResponse = HandleStor(arguments);
+                            //commandResponse = HandleStor(arguments);
+                            //todo: update thread working for stor and retr
                             break;
                         case "NOOP":
                             commandResponse = "200 OK";
@@ -123,7 +131,10 @@ namespace NetExplorerServer
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                if (_commandClient != null)
+                {
+                    _commandClient.Close();
+                }
             }
         }
 
@@ -242,7 +253,7 @@ namespace NetExplorerServer
             return "226 Transfer complited";
         }
 
-        private string HandleStor(string path)
+        private void HandleStor(string path)
         {
             TempPath = path;
             _commandStreamWriter.WriteLine("150 ready to recieve\n");
@@ -250,7 +261,7 @@ namespace NetExplorerServer
             DataNetworkStream = CreateNetworkStream();
             _fileThread = new Thread(_directoriesBackend.GetFile);
             _fileThread.Start();
-            return "226 upload complete";
+            //return "226 upload complete";
         }
 
         private string HandleAbor()

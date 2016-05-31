@@ -1,7 +1,9 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace NetExplorerServer
 {
@@ -21,21 +23,20 @@ namespace NetExplorerServer
         {
             _serverListiner = new TcpListener(IPAddress.Any, Port);
             _serverListiner.Start();
-            TcpClient serverClient = null;
+            _serverListiner.BeginAcceptTcpClient(AcceptCallback,_serverListiner);
+        }
+
+        private void AcceptCallback(IAsyncResult result)
+        {
+            TcpClient serverClient = _serverListiner.EndAcceptTcpClient(result);
+            _serverListiner.BeginAcceptTcpClient(AcceptCallback, _serverListiner);
+            FtpBackend ftpBackend = new FtpBackend(serverClient);
             while (true)
             {
-                try
+                ftpBackend.HandleFtp();
+                if (!serverClient.Connected)
                 {
-                    serverClient = _serverListiner.AcceptTcpClient();
-                    FtpBackend ftpBackend = new FtpBackend(serverClient);
-                    new Thread(ftpBackend.HandleFtp).Start();
-                }
-                catch (IOException e)
-                {
-                    if (serverClient != null)
-                    {
-                        serverClient.Close();
-                    }
+                    break;
                 }
             }
         }
