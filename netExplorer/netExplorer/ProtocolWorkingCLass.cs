@@ -38,7 +38,8 @@ namespace netExplorer
             }
             catch (Exception e)
             {
-                MessageBox.Show("Ошибка",@"Сервер недоступен или порт используется другой программой");
+                MessageBox.Show(@"Сервер недоступен или порт используется другой программой","Ошибка");
+                return;
             }
             CommandNetworkStream = CurrentTcpClient.GetStream();
                 CommandStream = new StreamWriter(CommandNetworkStream);
