@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
@@ -15,7 +16,7 @@ namespace NetExplorerServer
         public static NetworkStream DataNetworkStream;
         private StreamWriter _commandStreamWriter;
         private StreamReader _commadStreamReader;
-        private ushort _clientPort;
+        private const ushort ClientPort = 20;
         private string _ipAdress;
         private DirectoriesBackend _directoriesBackend;
         private Thread _fileThread;
@@ -75,9 +76,6 @@ namespace NetExplorerServer
                             break;
                         case "PWD":
                             commandResponse = HandlePwd();
-                            break;
-                        case "PORT":
-                            commandResponse = HandlePort(arguments);
                             break;
                         case "LIST":
                             commandResponse = HandleList();
@@ -175,17 +173,6 @@ namespace NetExplorerServer
             return response;
         }
 
-        private string HandlePort(string argument)
-        {
-            string[] ipEndPoint = argument.Split(',');
-            _ipAdress = ipEndPoint[0] + '.' + ipEndPoint[1] + '.' + ipEndPoint[2] + '.' + ipEndPoint[3];
-            byte[] portByte =
-            {
-                Convert.ToByte(ipEndPoint[4]), Convert.ToByte((ipEndPoint[5]))
-            };
-            _clientPort = (ushort) ((portByte[0] << 8) | portByte[1]);
-            return "200 active";
-        }
 
         private string HandlePwd()
         {
@@ -207,13 +194,15 @@ namespace NetExplorerServer
 
         private NetworkStream CreateNetworkStream()
         {
+            string endPoint = _commandClient.Client.RemoteEndPoint.ToString();
+            string ipAddress = endPoint.Split(':')[0];
             if ((_dataClient != null) && (_dataClient.Connected))
             {
                 _dataClient.Close();
             }
             try
             {
-                _dataClient = new TcpClient(_ipAdress, _clientPort);
+                _dataClient = new TcpClient(ipAddress ,ClientPort);
             }
             catch (Exception e)
             {

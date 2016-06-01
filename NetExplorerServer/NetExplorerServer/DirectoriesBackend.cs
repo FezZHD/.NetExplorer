@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
@@ -96,14 +97,11 @@ namespace NetExplorerServer
             {
                 NewLine = "\n"
             };
-            
-            _streamWriter.WriteLine("drwxrwxrwx 1   owner   group   {0,8}   {1}", "4096", "..");
             IEnumerable<string> directoriesEnumerable = Directory.EnumerateDirectories(CurrentDirectory);
             foreach (string directory in directoriesEnumerable)
             {
                 DirectoryInfo currentDirectoryInfo = new DirectoryInfo(directory);
-                string resultLine = string.Format("drwxrwxrwx 1   owner   group   {0,8}   {1}", "4096",
-                    currentDirectoryInfo.Name);
+                string resultLine = string.Format("{0} {1} {2} {3} {4}", "DIR" , currentDirectoryInfo.Name.Replace(' ','|'), Directory.GetLastWriteTime(currentDirectoryInfo.FullName).ToString(CultureInfo.InvariantCulture).Replace(' ','|'), "", currentDirectoryInfo.FullName.Replace(' ','|'));
                 _streamWriter.WriteLine(resultLine);
                 _streamWriter.Flush();
             }
@@ -113,8 +111,7 @@ namespace NetExplorerServer
             {
                 FileInfo currentFileInfo = new FileInfo(file);
 
-                string resultString = String.Format("-rw-r--r-- 1   owner   group   {0,8} {1}", currentFileInfo.Length,
-                    currentFileInfo.Name);
+                string resultString = string.Format("{0} {1} {2} {3} {4}", currentFileInfo.Extension, currentFileInfo.Name.Replace(' ','|'), File.GetLastWriteTime(currentFileInfo.FullName).ToString(CultureInfo.InvariantCulture).Replace(' ','|'), currentFileInfo.Length, currentFileInfo.FullName.Replace(' ','|'));
                 _streamWriter.WriteLine(resultString);
                 _streamWriter.Flush();
             }
