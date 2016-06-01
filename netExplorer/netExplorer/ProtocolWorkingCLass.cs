@@ -76,9 +76,17 @@ namespace netExplorer
             CommandStream.Flush();
             _answer = GetAnswer();
             #pragma warning disable 618
-             TcpListiner = new TcpListener(20);
+            try
+            {
+                TcpListiner = new TcpListener(20);
+                TcpListiner.Start();
+            }
+            catch (Exception)
+            {
+                MessageBox.Show(@"Ошибка подключения");
+                return;
+            }
             #pragma warning restore 618
-            TcpListiner.Start();
             TcpClient listClient = TcpListiner.AcceptTcpClient();
             NetworkStream listNetwork = listClient.GetStream();
             StreamReader listWriter = new StreamReader(listNetwork);
