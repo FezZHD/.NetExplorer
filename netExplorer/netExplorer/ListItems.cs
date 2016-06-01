@@ -9,7 +9,7 @@ namespace netExplorer
 {
     public class ListItems
     {
-        public string Type { get; set; }
+        public string Type { get;}
         public string Name { get; set; }
         public string Time { get; set; }
         public string Size { get; set; }

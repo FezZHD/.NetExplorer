@@ -22,8 +22,8 @@
                     <GridView>
                         <GridViewColumn Header="Тип" Width="50" DisplayMemberBinding="{Binding Path = Type}"/>
                         <GridViewColumn Header="Имя папки/файла" Width="400" DisplayMemberBinding="{Binding Path = Name}"/>
-                        <GridViewColumn Header="Размер" Width="50" DisplayMemberBinding="{Binding Path = Size}"/>
-                        <GridViewColumn Header="Последнее изменение" Width="100" DisplayMemberBinding="{Binding Path = Time}"/>
+                        <GridViewColumn Header="Размер" Width="60" DisplayMemberBinding="{Binding Path = Size}"/>
+                        <GridViewColumn Header="Последнее изменение" Width="200" DisplayMemberBinding="{Binding Path = Time}"/>
                     </GridView>
                 </ListView.View>
                 <ListView.ContextMenu>
