@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +20,8 @@ namespace netExplorer
         public StreamReader CommandReaderStream;
         public NetworkStream CommandNetworkStream;
         private string _answer;
+        private TcpListener TcpListiner;
+        public List<ListItems> List = new List<ListItems>();
 
         public ProtocolWorkingCLass(string server, string login, string password)
         {
@@ -29,12 +32,20 @@ namespace netExplorer
 
         public void Connect()
         {
-            CurrentTcpClient.Connect(_server,21);
+            try
+            {
+                CurrentTcpClient.Connect(_server, 21);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Ошибка",@"Сервер недоступен или порт используется другой программой");
+            }
             CommandNetworkStream = CurrentTcpClient.GetStream();
-            CommandStream = new StreamWriter(CommandNetworkStream);
-            CommandReaderStream = new StreamReader(CommandNetworkStream);
-            _answer = CommandReaderStream.ReadLine();
-            CheckAutherization();
+                CommandStream = new StreamWriter(CommandNetworkStream);
+                CommandReaderStream = new StreamReader(CommandNetworkStream);
+                _answer = CommandReaderStream.ReadLine();
+                CheckAutherization();
+
         }
 
         public void CheckAutherization()
@@ -49,8 +60,8 @@ namespace netExplorer
             CommandStream.WriteLine("PASS {0}",_password);
             CommandStream.Flush();
             _answer = GetAnswer();
-            //TODO authetication
-            
+            GetList();
+            //TODO authetication       
         }
 
         private string GetAnswer()
@@ -59,6 +70,32 @@ namespace netExplorer
             return returnCommand;
         }
 
+        private void GetList()
+        {
+            CommandStream.WriteLine("LIST");
+            CommandStream.Flush();
+            _answer = GetAnswer();
+            #pragma warning disable 618
+             TcpListiner = new TcpListener(20);
+            #pragma warning restore 618
+            TcpListiner.Start();
+            TcpClient listClient = TcpListiner.AcceptTcpClient();
+            NetworkStream listNetwork = listClient.GetStream();
+            StreamReader listWriter = new StreamReader(listNetwork);
+            ListWorking(listWriter);
+            _answer = GetAnswer();
+            TcpListiner.Stop();
+        }
+
+        private void ListWorking(StreamReader stream)
+        {
+            string answer;
+            while (!string.IsNullOrEmpty(answer = stream.ReadLine()))
+            {
+                string[] answerArray = answer.Split(' ');
+                List.Add(new ListItems(answerArray[0].Replace(".",""),answerArray[1].Replace('|',' '),answerArray[2].Replace('|',' '),answerArray[3],answerArray[4].Replace('|',' ')));
+            }
+        }
 
     }
 }

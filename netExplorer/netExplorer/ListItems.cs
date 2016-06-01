@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace netExplorer
 {
-    class ListItems
+    public class ListItems
     {
-        public string Type;
-        public string Name;
-        public string Time;
-        public string Size;
-        public string Path;
+        public string Type { get; set; }
+        public string Name { get; set; }
+        public string Time { get; set; }
+        public string Size { get; set; }
+        public string Path { get; set; }
 
         public ListItems(string type, string name, string time, string size, string path)
         {

@@ -20,10 +20,10 @@
             <ListView x:Name="DataView">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Header="Тип" Width="50" DisplayMemberBinding="{Binding Type}"/>
-                        <GridViewColumn Header="Имя папки/файла" Width="400" DisplayMemberBinding="{Binding Name}"/>
-                        <GridViewColumn Header="Размер" Width="50" DisplayMemberBinding="{Binding Size}"/>
-                        <GridViewColumn Header="Дата создания" Width="100" DisplayMemberBinding="{Binding Time}"/>
+                        <GridViewColumn Header="Тип" Width="50" DisplayMemberBinding="{Binding Path = Type}"/>
+                        <GridViewColumn Header="Имя папки/файла" Width="400" DisplayMemberBinding="{Binding Path = Name}"/>
+                        <GridViewColumn Header="Размер" Width="50" DisplayMemberBinding="{Binding Path = Size}"/>
+                        <GridViewColumn Header="Последнее изменение" Width="100" DisplayMemberBinding="{Binding Path = Time}"/>
                     </GridView>
                 </ListView.View>
                 <ListView.ContextMenu>

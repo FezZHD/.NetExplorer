@@ -30,13 +30,13 @@ namespace netExplorer
         {
              CurrentProtocol = new ProtocolWorkingCLass(Addres.Text,Login.Text,Password.Password);
              CurrentProtocol.Connect();
+             DataView.ItemsSource = CurrentProtocol.List;
         }
 
         private void MainWindow_Closed(object sender, EventArgs e)
         {
             if(CurrentProtocol.CurrentTcpClient != null)
             { 
-
                 CurrentProtocol.CurrentTcpClient.Close();
             }
         }
