@@ -58,7 +58,7 @@ namespace NetExplorerServer
         }
 
 
-        public void SendFile()
+        public string SendFile()
         {
             string filePath = CurrentDirectory + "\\" + FtpBackend.TempPath;
 
@@ -76,19 +76,25 @@ namespace NetExplorerServer
                             FtpBackend.DataNetworkStream.Write(fileBuffer, 0, count);
                         }
                         catch (IOException)
+                        {                           
+                            return "";
+                        }
+                        finally
                         {
                             sendFileStream.Close();
-                            return;
                         }
                     }
+                    Response = "226 uploading complete";
                 }
-                sendFileStream.Close();
+
                 if (FtpBackend.DataNetworkStream == null)
                 {
-                    return;
+                    return "";
                 }
             }
             FtpBackend.DataNetworkStream.Close();
+            return Response;
+
         }
 
         public void GetList(NetworkStream stream)

@@ -239,9 +239,13 @@ namespace NetExplorerServer
             _commandStreamWriter.WriteLine("150 ready to send\n");
             _commandStreamWriter.Flush();
             DataNetworkStream = CreateNetworkStream();
-            _fileThread = new Thread(_directoriesBackend.SendFile);
+            _fileThread = new Thread(
+                () =>
+                    _directoriesBackend.Response = _directoriesBackend.SendFile()
+                );
             _fileThread.Start();
-            return "226 Transfer complited";
+            _fileThread.Join();
+            return _directoriesBackend.Response;
         }
 
         private string HandleStor(string path)
