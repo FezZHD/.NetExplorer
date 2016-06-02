@@ -19,7 +19,7 @@ namespace netExplorer
     /// </summary>
     public partial class MainClientWindow : Window
     {
-        public ProtocolWorkingCLass CurrentProtocol;
+        private ProtocolWorkingCLass _currentProtocol;
 
         public MainClientWindow()
         {
@@ -28,16 +28,16 @@ namespace netExplorer
 
         private void EnterButton_Click(object sender, RoutedEventArgs e)
         {
-             CurrentProtocol = new ProtocolWorkingCLass(Addres.Text,Login.Text,Password.Password);
-             CurrentProtocol.Connect();
-             DataView.ItemsSource = CurrentProtocol.List;
+             _currentProtocol = new ProtocolWorkingCLass(Addres.Text,Login.Text,Password.Password);
+             _currentProtocol.Connect();
+             DataView.ItemsSource = _currentProtocol.List;
         }
 
         private void MainWindow_Closed(object sender, EventArgs e)
         {
-            if(CurrentProtocol.CurrentTcpClient != null)
+            if(_currentProtocol != null)
             { 
-                CurrentProtocol.CurrentTcpClient.Close();
+                _currentProtocol.CurrentTcpClient.Close();
             }
         }
     }

@@ -36,7 +36,7 @@ namespace netExplorer
             {
                 CurrentTcpClient.Connect(_server, 21);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 MessageBox.Show(@"Сервер недоступен или порт используется другой программой","Ошибка");
                 return;
