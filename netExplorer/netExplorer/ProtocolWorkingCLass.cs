@@ -13,14 +13,14 @@ namespace netExplorer
     public class ProtocolWorkingCLass
     {
         public TcpClient CurrentTcpClient = new TcpClient(); 
-        private string _server;
-        private string _login;
-        private string _password;
+        private readonly string _server;
+        private readonly string _login;
+        private readonly string _password;
         public StreamWriter CommandStream;
         public StreamReader CommandReaderStream;
         public NetworkStream CommandNetworkStream;
         private string _answer;
-        private TcpListener TcpListiner;
+        private TcpListener _tcpListiner;
         public List<ListItems> List = new List<ListItems>();
 
         public ProtocolWorkingCLass(string server, string login, string password)
@@ -42,14 +42,13 @@ namespace netExplorer
                 return;
             }
             CommandNetworkStream = CurrentTcpClient.GetStream();
-                CommandStream = new StreamWriter(CommandNetworkStream);
-                CommandReaderStream = new StreamReader(CommandNetworkStream);
-                _answer = CommandReaderStream.ReadLine();
-                CheckAutherization();
-
+            CommandStream = new StreamWriter(CommandNetworkStream);
+            CommandReaderStream = new StreamReader(CommandNetworkStream);
+            _answer = CommandReaderStream.ReadLine();
+            CheckAutherization();
         }
 
-        public void CheckAutherization()
+        private void CheckAutherization()
         {
             CommandStream.WriteLine("USER {0}",_login);
             CommandStream.Flush();
@@ -79,8 +78,8 @@ namespace netExplorer
             #pragma warning disable 618
             try
             {
-                TcpListiner = new TcpListener(20);
-                TcpListiner.Start();
+                _tcpListiner = new TcpListener(20);
+                _tcpListiner.Start();
             }
             catch (Exception)
             {
@@ -88,12 +87,12 @@ namespace netExplorer
                 return;
             }
             #pragma warning restore 618
-            TcpClient listClient = TcpListiner.AcceptTcpClient();
+            TcpClient listClient = _tcpListiner.AcceptTcpClient();
             NetworkStream listNetwork = listClient.GetStream();
             StreamReader listWriter = new StreamReader(listNetwork);
             ListWorking(listWriter);
             _answer = GetAnswer();
-            TcpListiner.Stop();
+            _tcpListiner.Stop();
         }
 
         private void ListWorking(StreamReader stream)
