@@ -10,7 +10,7 @@ namespace NetExplorerServer
 {
     internal class FtpBackend
     {
-        private readonly TcpClient _commandClient;
+        private TcpClient _commandClient;
         private TcpClient   _dataClient;
         private readonly NetworkStream _commandNetworkStream;
         public static NetworkStream DataNetworkStream;
@@ -272,15 +272,13 @@ namespace NetExplorerServer
 
         private string HandleDele(string path)
         {
-            _directoriesBackend.DeleteFile(path);
-            return "250 file deleted";
+            return _directoriesBackend.DeleteFile(path);
         }
 
 
         private string HandleRmd(string path)
         {
-            _directoriesBackend.DeleteDirectory(path);
-            return "250 directory deleted";
+            return _directoriesBackend.DeleteDirectory(path);
         }
 
         private string HandleMkd(string path)

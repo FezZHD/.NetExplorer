@@ -84,7 +84,7 @@ namespace NetExplorerServer
                             sendFileStream.Close();
                         }
                     }
-                    Response = "226 uploading complete";
+                    Response = "226 sending complete";
                 }
 
                 if (FtpBackend.DataNetworkStream == null)
@@ -154,30 +154,46 @@ namespace NetExplorerServer
             }
         }
 
-        public void DeleteDirectory(string path)
+        public string DeleteDirectory(string path)
         {
-            string deltebleDirectory = CurrentDirectory + "\\" + path;
+            string deltebleDirectory = path;
             if (Directory.Exists(deltebleDirectory))
             {
-               DirectoryInfo ourDirectory = new DirectoryInfo(deltebleDirectory);
-                ourDirectory.Delete(true);
+                try
+                {
+                    DirectoryInfo ourDirectory = new DirectoryInfo(deltebleDirectory);
+                    ourDirectory.Delete(true);
+                }
+                catch (Exception)
+                {
+                    return "Ошибка удаления";
+                }
             }
+            return "250 directory deleted";
         }
 
         public void CreateDirectory(string path)
         {
-            string newPath = CurrentDirectory + "\\" + path;
+            string newPath = path;
             Directory.CreateDirectory(newPath);
         }
 
-        public void DeleteFile(string path)
+        public string DeleteFile(string path)
         {
-            string deletableFile = CurrentDirectory + "\\" + path;
+            string deletableFile = path;
             if (File.Exists(deletableFile))
             {
-                FileInfo ourFile = new FileInfo(deletableFile);
-                ourFile.Delete();
+                try
+                {
+                    FileInfo ourFile = new FileInfo(deletableFile);
+                    ourFile.Delete();
+                }
+                catch (Exception)
+                {
+                    return "Ошибка удаления";
+                }
             }
+            return "250 file deleted";
         }
     }
 }
