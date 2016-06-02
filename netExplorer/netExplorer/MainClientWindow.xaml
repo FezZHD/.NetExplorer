@@ -6,17 +6,20 @@
         xmlns:local="clr-namespace:netExplorer"
         mc:Ignorable="d"
         Title=".Net Client" Height="600" Width="800" MinWidth="800" MinHeight="600" Background="#FF3A3636" Closed="MainWindow_Closed">
-    <Grid x:Name="MainGrid">
-        <Grid Name="ControlGrid" HorizontalAlignment="Left" Height="570" VerticalAlignment="Top" Width="194">
+    <Grid x:Name="MainGrid" Margin="0,0,0,0">
+        <Grid Name="ControlGrid" Width="199" MinHeight="385" HorizontalAlignment="Left" Margin="0,0,0,185">
             <Label x:Name="LoginLabel" Content="Логин" HorizontalAlignment="Left" Margin="10,81,0,0" VerticalAlignment="Top" Background="{x:Null}" Foreground="White"/>
             <Label x:Name="PasswordLabel" Content="Пароль" HorizontalAlignment="Left" Margin="10,144,0,0" VerticalAlignment="Top" Foreground="White"/>
             <TextBox x:Name="Login" HorizontalAlignment="Left" Height="23" Margin="10,114,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
             <PasswordBox x:Name="Password" HorizontalAlignment="Left" Margin="10,177,0,0" VerticalAlignment="Top" Width="120"/>
-            <Label x:Name="AddresLabel" Content="Адрес Сервера" HorizontalAlignment="Left" Margin="10,13,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.561,0.286"/>
+            <Label x:Name="AddresLabel" Content="Адрес Сервера" HorizontalAlignment="Left" Margin="10,13,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.561,0.286" Foreground="#FFFDFDFD"/>
             <TextBox x:Name="Addres" HorizontalAlignment="Left" Height="23" Margin="10,46,0,0" TextWrapping="Wrap" Text="localhost" VerticalAlignment="Top" Width="120"/>
             <Button x:Name="EnterButton" Content="Войти" HorizontalAlignment="Left" Margin="10,223,0,0" VerticalAlignment="Top" Width="75" Click="EnterButton_Click"/>
+            <Button Name="DownloadButton" Content="Папка загрузки" HorizontalAlignment="Left" Margin="10,345,0,10" VerticalAlignment="Bottom" Width="141"/>
+            <Label Name="DownloadPath" Margin="10,0,0,60" Foreground="White" VerticalAlignment="Bottom" HorizontalAlignment="Left" MaxWidth="180">
+            </Label>
         </Grid>
-        <Grid Name="DataGrid" Margin="199,10,0,0">
+        <Grid Name="DataGrid" Margin="199,10,0,185">
             <ListView x:Name="DataView">
                 <ListView.View>
                     <GridView>
@@ -28,9 +31,9 @@
                 </ListView.View>
                 <ListView.ContextMenu>
                     <ContextMenu Name="ContextMenu">
-                        <MenuItem Header="Удалить"></MenuItem>
-                        <MenuItem Header="Скачать"></MenuItem>
-                        <MenuItem Header="Переименовать"></MenuItem>
+                        <MenuItem Header="Удалить" Click="Delete_OnClick"></MenuItem>
+                        <MenuItem Header="Скачать" Click="Dowload_OnClick"></MenuItem>
+                        <MenuItem Header="Переименовать" Click="Rename_OnClick"></MenuItem>
                     </ContextMenu>
                 </ListView.ContextMenu>
             </ListView>

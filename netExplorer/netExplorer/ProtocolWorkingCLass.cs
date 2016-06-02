@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -98,6 +99,7 @@ namespace netExplorer
         private void ListWorking(StreamReader stream)
         {
             string answer;
+            List.Clear();
             while (!string.IsNullOrEmpty(answer = stream.ReadLine()))
             {
                 string[] answerArray = answer.Split(' ');
@@ -105,5 +107,31 @@ namespace netExplorer
             }
         }
 
+        public void Delete(int listIndex)
+        {
+            try
+            {
+                if (List[listIndex].Type.Equals("DIR"))
+                {
+                    DeleteSmth("RMD", listIndex);
+                }
+                else
+                {
+                    DeleteSmth("DELE", listIndex);
+                }
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return;
+            }
+        }
+        private void DeleteSmth(string command ,int index)
+        {
+            CommandStream.WriteLine("{0} {1}",command, List[index].Path);
+            _answer = GetAnswer();
+            CommandStream.Flush();
+            GetList();
+            CommandStream.Flush();
+        }
     }
 }
