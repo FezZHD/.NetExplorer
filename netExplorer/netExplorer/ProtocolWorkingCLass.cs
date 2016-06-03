@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -23,6 +24,7 @@ namespace netExplorer
         private string _answer;
         private TcpListener _tcpListiner;
         public List<ListItems> List = new List<ListItems>();
+        private Thread _listThread;
 
         public ProtocolWorkingCLass(string server, string login, string password)
         {
@@ -61,7 +63,8 @@ namespace netExplorer
             CommandStream.WriteLine("PASS {0}",_password);
             CommandStream.Flush();
             _answer = GetAnswer();
-            GetList();
+            _listThread = new Thread(GetList);
+            _listThread.Start();
             //TODO authetication       
         }
 
@@ -94,6 +97,11 @@ namespace netExplorer
             ListWorking(listWriter);
             _answer = GetAnswer();
             _tcpListiner.Stop();
+            MainClientWindow.TransferWindow.Dispatcher.Invoke(new ThreadStart(delegate
+            {
+                MainClientWindow.TranferView.ItemsSource = List;
+            }));
+            _listThread.Abort();
         }
 
         private void ListWorking(StreamReader stream)

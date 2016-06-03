@@ -34,6 +34,7 @@
                         <MenuItem Header="Удалить" Click="Delete_OnClick"></MenuItem>
                         <MenuItem Header="Скачать" Click="Dowload_OnClick"></MenuItem>
                         <MenuItem Header="Переименовать" Click="Rename_OnClick"></MenuItem>
+                        <MenuItem Header="Новая папка" Click="NewFolder_OnClick"></MenuItem>
                     </ContextMenu>
                 </ListView.ContextMenu>
             </ListView>

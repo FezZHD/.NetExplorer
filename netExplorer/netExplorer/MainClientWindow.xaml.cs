@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Remoting.Channels;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -23,10 +23,14 @@ namespace netExplorer
     public partial class MainClientWindow : Window
     {
         private ProtocolWorkingCLass _currentProtocol;
+        public static MainClientWindow TransferWindow { get; private set; }
+        public static ListView TranferView { get; private set; }
 
         public MainClientWindow()
         {
             InitializeComponent();
+            TransferWindow = MainWindow;
+            TranferView = DataView;
             DownloadPath.Content = Path.GetTempPath();
         }
 
@@ -34,7 +38,6 @@ namespace netExplorer
         {
              _currentProtocol = new ProtocolWorkingCLass(Addres.Text,Login.Text,Password.Password);
              _currentProtocol.Connect();
-             DataView.ItemsSource = _currentProtocol.List;
         }
 
         private void MainWindow_Closed(object sender, EventArgs e)
@@ -57,6 +60,11 @@ namespace netExplorer
 
         private void Rename_OnClick(object sender, RoutedEventArgs e)
         {
+        }
+
+        private void NewFolder_OnClick(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
