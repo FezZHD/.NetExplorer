@@ -13,7 +13,7 @@ namespace NetExplorerServer
         private StreamWriter _streamWriter;
         private const int BufferSize = 4096;
         public string Response { get; set; }
-        public string CurrentDirectory { get; set; }
+        public string CurrentDirectory { get; private set; }
         private readonly Stack<string> _rootStack = new Stack<string>(); 
 
         public DirectoriesBackend()
@@ -28,9 +28,9 @@ namespace NetExplorerServer
             string fileName = CurrentDirectory + "\\" + FtpBackend.TempPath;
             FileStream currentFile = new FileStream(fileName, FileMode.Create, FileAccess.Write);
             byte[] buffer = new byte[BufferSize];
-            int count;
             try
             {
+                int count;
                 while ((count = FtpBackend.DataNetworkStream.Read(buffer, 0, buffer.Length)) > 0 &&
                        (FtpBackend.DataNetworkStream != null))
 
@@ -66,9 +66,9 @@ namespace NetExplorerServer
             {
                 FileStream sendFileStream = new FileStream(filePath,FileMode.Open, FileAccess.Read);
                 byte[] fileBuffer = new byte[BufferSize];
-                int count;
                 lock (FtpBackend.DataNetworkStream)
                 {
+                    int count;
                     while ((count = sendFileStream.Read(fileBuffer, 0, fileBuffer.Length)) > 0 && (FtpBackend.DataNetworkStream != null))
                     {
                         try

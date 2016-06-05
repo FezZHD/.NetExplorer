@@ -17,7 +17,6 @@ namespace NetExplorerServer
         private StreamWriter _commandStreamWriter;
         private StreamReader _commadStreamReader;
         private const ushort ClientPort = 20;
-        private string _ipAdress;
         private DirectoriesBackend _directoriesBackend;
         private Thread _fileThread;
         public static string TempPath;
@@ -39,7 +38,7 @@ namespace NetExplorerServer
                 _commandStreamWriter.Flush();
                 Console.WriteLine("220 OK");
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 _commandClient.Close();
                 return;
@@ -129,7 +128,7 @@ namespace NetExplorerServer
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 if (_commandClient != null)
                 {
