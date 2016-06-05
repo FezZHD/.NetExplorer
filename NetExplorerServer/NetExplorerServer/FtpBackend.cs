@@ -19,7 +19,6 @@ namespace NetExplorerServer
         private const ushort ClientPort = 20;
         private DirectoriesBackend _directoriesBackend;
         private Thread _fileThread;
-        public static string TempPath;
 
         public FtpBackend(TcpClient commandClient)
         {
@@ -89,7 +88,7 @@ namespace NetExplorerServer
                             commandResponse = HandleMkd(arguments);
                             break;
                         case "RMD":
-                            commandResponse = HandleRmd(arguments);
+                            commandResponse = HandleRmd(arguments.Replace('|',' '));
                             break;
                         case "DELE":
                             commandResponse = HandleDele(arguments.Replace('|',' '));
@@ -209,7 +208,7 @@ namespace NetExplorerServer
             {
                 _dataClient = new TcpClient(ipAddress ,ClientPort);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Console.WriteLine("Происходит отладка или ошибка подключение. Отключение клиента");
                 throw;
@@ -240,13 +239,13 @@ namespace NetExplorerServer
 
         private string HandleRetr(string path)
         {
-            TempPath = path;
+            string filePath = path;
             _commandStreamWriter.WriteLine("150 ready to send\n");
             _commandStreamWriter.Flush();
             DataNetworkStream = CreateNetworkStream();
             _fileThread = new Thread(
                 () =>
-                    _directoriesBackend.Response = _directoriesBackend.SendFile()
+                    _directoriesBackend.Response = _directoriesBackend.SendFile(filePath)
                 );
             _fileThread.Start();
             _fileThread.Join();
@@ -255,13 +254,13 @@ namespace NetExplorerServer
 
         private string HandleStor(string path)
         {
-            TempPath = path;
+            string filePath = path;
             _commandStreamWriter.WriteLine("150 ready to recieve\n");
             _commandStreamWriter.Flush();
             DataNetworkStream = CreateNetworkStream();
             _fileThread = new Thread(
                 () =>
-                _directoriesBackend.Response = _directoriesBackend.GetFile()
+                _directoriesBackend.Response = _directoriesBackend.GetFile(filePath)
             );
             _fileThread.Start();
             _fileThread.Join();

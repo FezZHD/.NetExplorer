@@ -22,10 +22,10 @@ namespace NetExplorerServer
         }
 
 
-        public string GetFile()
+        public string GetFile(string path)
         {
             Response = "";
-            string fileName = CurrentDirectory + "\\" + FtpBackend.TempPath;
+            string fileName = path;
             FileStream currentFile = new FileStream(fileName, FileMode.Create, FileAccess.Write);
             byte[] buffer = new byte[BufferSize];
             try
@@ -58,9 +58,9 @@ namespace NetExplorerServer
         }
 
 
-        public string SendFile()
+        public string SendFile(string path)
         {
-            string filePath = CurrentDirectory + "\\" + FtpBackend.TempPath;
+            string filePath = path;
 
             if (File.Exists(filePath))
             {
