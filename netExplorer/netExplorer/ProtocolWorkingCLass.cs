@@ -74,7 +74,7 @@ namespace netExplorer
             return returnCommand;
         }
 
-        private void GetList()
+        public void GetList()
         {
             TcpClient listClient;
             CommandStream.WriteLine("LIST");
@@ -90,8 +90,6 @@ namespace netExplorer
             }
             catch (Exception)
             {
-                _tcpListiner.Stop();
-                _listThread.Abort();
                 return;
             }
             #pragma warning restore 618
@@ -100,7 +98,6 @@ namespace netExplorer
             ListWorking(listWriter);
             _answer = GetAnswer();
             _tcpListiner.Stop();
-            listClient.Close();
             MainClientWindow.TransferWindow.Dispatcher.Invoke(new ThreadStart(delegate
             {
                 MainClientWindow.TranferView.ItemsSource = List;
@@ -155,13 +152,45 @@ namespace netExplorer
         {
             if (List[index].Type.Equals("DIR"))
             {
-                RenameSmth("RENAMEFOLDER",index,MainClientWindow.NewName);
+                RenameSmth("RENAMEFOLDER",index, MainClientWindow.NewName);
+            }
+            else
+            {
+                RenameSmth("RENAMEFILE", index, MainClientWindow.NewName + '.' + List[index].Type);
             }
         }
 
         private void RenameSmth(string command, int index, string newName)
         {
             CommandStream.WriteLine("{0} {1} {2}", command, List[index].Path.Replace(' ','|'), newName.Replace(' ','|'));
+            _answer = GetAnswer();
+            CommandStream.Flush();
+            GetList();
+            CommandStream.Flush();
+        }
+
+
+        public void DoubleClickHeadler(int index)
+        {
+            if (List[index].Type.Equals("DIR"))
+            {
+                ChangeDirUp(List[index].Path);
+            }
+        }
+        
+        private void ChangeDirUp(string path)
+        {
+            CommandStream.WriteLine("CWD {0}",path.Replace('|',' '));
+            _answer = GetAnswer();
+            CommandStream.Flush();
+            GetList();
+            CommandStream.Flush();
+        }
+
+
+        public void MakeDir(string newName)
+        {
+            CommandStream.WriteLine("MKD {0}", newName);
             _answer = GetAnswer();
             CommandStream.Flush();
             GetList();

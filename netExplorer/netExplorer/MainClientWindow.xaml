@@ -32,7 +32,7 @@
                 <ListView.Resources>
                     <ContextMenu x:Key="ItemContextMenu">
                         <MenuItem Header="Удалить" Click="Delete_OnClick" Command="{Binding Path=DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"></MenuItem>
-                        <MenuItem Header="Скачать" Click="Dowload_OnClick" Command="{Binding Path=DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"></MenuItem>
+                        <MenuItem Header="Обновить" Click="Refresh_OnClick" Command="{Binding Path=DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"></MenuItem>
                         <MenuItem Header="Переименовать" Click="Rename_OnClick" Command="{Binding Path=DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"></MenuItem>
                         <MenuItem Header="Новая папка" Click="NewFolder_OnClick" Command="{Binding Path=DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"></MenuItem>
                     </ContextMenu>

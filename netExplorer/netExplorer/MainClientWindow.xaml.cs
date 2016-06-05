@@ -54,10 +54,7 @@ namespace netExplorer
             _currentProtocol.Delete(DataView.SelectedIndex);
             DataView.Items.Refresh();
         }
-
-        private void Dowload_OnClick(object sender, RoutedEventArgs e)
-        {
-        }
+     
 
         private void Rename_OnClick(object sender, RoutedEventArgs e)
         {
@@ -72,7 +69,13 @@ namespace netExplorer
 
         private void NewFolder_OnClick(object sender, RoutedEventArgs e)
         {
-
+            RenameForm newFolderForm = new RenameForm();
+            newFolderForm.ShowDialog();
+            if (IsOk)
+            {
+                _currentProtocol.MakeDir(NewName);
+            }
+            DataView.Items.Refresh();
         }
 
         private void ClientDisconnect()
@@ -94,7 +97,15 @@ namespace netExplorer
 
             if (originalDependencyObject != null)
             {
+                _currentProtocol.DoubleClickHeadler(DataView.SelectedIndex);
+                DataView.Items.Refresh();
             }
+        }
+
+        private void Refresh_OnClick(object sender, RoutedEventArgs e)
+        {
+            _currentProtocol.GetList();
+            DataView.Items.Refresh();
         }
     }
 }
