@@ -195,5 +195,26 @@ namespace NetExplorerServer
             }
             return "250 file deleted";
         }
+
+        public string RenameCurrentFolder(string path, string newName)
+        {
+            DirectoryInfo oldDirectory = new DirectoryInfo(path);
+            if (oldDirectory.Parent != null)
+            {              
+                try
+                {
+                    string newPath = oldDirectory.FullName.Substring(0, oldDirectory.FullName.ToString().Length - oldDirectory.Name.Length) + newName;
+                    if (oldDirectory.Exists)
+                    {
+                        oldDirectory.MoveTo(newPath);
+                    }
+                }
+                catch (Exception)
+                {
+                    return "550 Ошибка при работе с папкой";
+                }
+            }
+            return "250 папка переименована";
+        }
     }
 }

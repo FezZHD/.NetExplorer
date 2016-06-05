@@ -92,7 +92,7 @@ namespace NetExplorerServer
                             commandResponse = HandleRmd(arguments);
                             break;
                         case "DELE":
-                            commandResponse = HandleDele(arguments);
+                            commandResponse = HandleDele(arguments.Replace('|',' '));
                             break;
                         case "RETR":
                             commandResponse = HandleRetr(arguments);
@@ -106,6 +106,9 @@ namespace NetExplorerServer
                             break;
                         case "AROR":
                             commandResponse = HandleAbor();
+                            break;
+                        case "RENAMEFOLDER":
+                            commandResponse = RenameFolder(commandStringsArray[1].Replace('|',' '), commandStringsArray[2].Replace('|',' ')); 
                             break;
                         default:
                             commandResponse = "502 command not implemented\n";
@@ -205,7 +208,7 @@ namespace NetExplorerServer
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Console.WriteLine("Происходит отладка или ошибка подключение. Отключение клиента");
                 throw;
             }
             return _dataClient.GetStream();
@@ -284,6 +287,11 @@ namespace NetExplorerServer
         {
             _directoriesBackend.CreateDirectory(path);
             return "250 directory created";
+        }
+
+        private string RenameFolder(string path, string newName)
+        {
+            return _directoriesBackend.RenameCurrentFolder(path, newName);
         }
     }
 }
