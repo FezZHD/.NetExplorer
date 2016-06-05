@@ -24,13 +24,13 @@
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="Тип" Width="50" DisplayMemberBinding="{Binding Path = Type}"/>
-                        <GridViewColumn Header="Имя папки/файла" Width="400" DisplayMemberBinding="{Binding Path = Name}"/>
+                        <GridViewColumn Header="Имя папки/файла" Width="300" DisplayMemberBinding="{Binding Path = Name}"/>
                         <GridViewColumn Header="Размер" Width="60" DisplayMemberBinding="{Binding Path = Size}"/>
                         <GridViewColumn Header="Последнее изменение" Width="200" DisplayMemberBinding="{Binding Path = Time}"/>
                     </GridView>
                 </ListView.View>
                 <ListView.ContextMenu>
-                    <ContextMenu Name="ContextMenu">
+                    <ContextMenu x:Name="ContextMenu">
                         <MenuItem Header="Удалить" Click="Delete_OnClick"></MenuItem>
                         <MenuItem Header="Скачать" Click="Dowload_OnClick"></MenuItem>
                         <MenuItem Header="Переименовать" Click="Rename_OnClick"></MenuItem>

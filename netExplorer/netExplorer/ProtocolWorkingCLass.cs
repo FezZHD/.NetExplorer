@@ -12,7 +12,7 @@ using System.Windows;
 
 namespace netExplorer
 {
-    public class ProtocolWorkingCLass
+    public class ProtocolWorkingClass
     {
         public TcpClient CurrentTcpClient = new TcpClient(); 
         private readonly string _server;
@@ -26,7 +26,7 @@ namespace netExplorer
         public List<ListItems> List = new List<ListItems>();
         private Thread _listThread;
 
-        public ProtocolWorkingCLass(string server, string login, string password)
+        public ProtocolWorkingClass(string server, string login, string password)
         {
             _server = server;
             _login = login;
@@ -140,6 +140,11 @@ namespace netExplorer
             CommandStream.Flush();
             GetList();
             CommandStream.Flush();
+        }
+
+        public void Disconnect()
+        {
+            CurrentTcpClient.Close();
         }
     }
 }

@@ -22,7 +22,7 @@ namespace netExplorer
     /// </summary>
     public partial class MainClientWindow : Window
     {
-        private ProtocolWorkingCLass _currentProtocol;
+        private ProtocolWorkingClass _currentProtocol;
         public static MainClientWindow TransferWindow { get; private set; }
         public static ListView TranferView { get; private set; }
 
@@ -36,16 +36,14 @@ namespace netExplorer
 
         private void EnterButton_Click(object sender, RoutedEventArgs e)
         {
-             _currentProtocol = new ProtocolWorkingCLass(Addres.Text,Login.Text,Password.Password);
+             ClientDisconnect();
+             _currentProtocol = new ProtocolWorkingClass(Addres.Text,Login.Text,Password.Password);
              _currentProtocol.Connect();
         }
 
         private void MainWindow_Closed(object sender, EventArgs e)
         {
-            if(_currentProtocol != null)
-            { 
-                _currentProtocol.CurrentTcpClient.Close();
-            }
+           ClientDisconnect();
         }
 
         private void Delete_OnClick(object sender, RoutedEventArgs e)
@@ -65,6 +63,14 @@ namespace netExplorer
         private void NewFolder_OnClick(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void ClientDisconnect()
+        {
+            if (_currentProtocol != null)
+            {
+                _currentProtocol.Disconnect();
+            }
         }
     }
 }
