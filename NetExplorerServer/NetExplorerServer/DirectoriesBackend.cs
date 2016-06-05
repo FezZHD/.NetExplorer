@@ -126,18 +126,7 @@ namespace NetExplorerServer
 
         public void ChangeDirectory(string path)
         {
-            string newPath = null;
-            if (path.Length >= CurrentDirectory.Length)
-            {
-                if (path.Substring(0, CurrentDirectory.Length).Equals(CurrentDirectory))
-                {
-                    newPath = path;
-                }
-            }
-            if (newPath == null)
-            {
-                newPath = CurrentDirectory + "\\" + path;
-            }
+            string newPath = path;
             _rootStack.Push(CurrentDirectory);
             CurrentDirectory = newPath;
         }
@@ -174,7 +163,7 @@ namespace NetExplorerServer
 
         public void CreateDirectory(string path)
         {
-            string newPath = path;
+            string newPath = CurrentDirectory + "\\" + path;
             Directory.CreateDirectory(newPath);
         }
 
@@ -215,6 +204,26 @@ namespace NetExplorerServer
                 }
             }
             return "250 папка переименована";
+        }
+
+
+        public string RemameFile(string path, string newFileName)
+        {
+            FileInfo currentFile = new FileInfo(path);
+            string newFilePath = currentFile.DirectoryName + "\\" + newFileName;
+            try
+            {
+                if (currentFile.Exists)
+                {
+                    currentFile.MoveTo(newFilePath);
+                }
+            }
+            catch (Exception)
+            {
+
+                return "550 Ошибка при работе с файлом";
+            }
+            return "250 файл переименован";
         }
     }
 }

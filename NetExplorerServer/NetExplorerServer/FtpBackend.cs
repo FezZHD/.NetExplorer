@@ -80,7 +80,7 @@ namespace NetExplorerServer
                             commandResponse = HandleList();
                             break;
                         case "CWD":
-                            commandResponse = HandleCwd(arguments);
+                            commandResponse = HandleCwd(arguments.Replace('|', ' '));
                             break;
                         case "CDUP":
                             commandResponse = HandleCdup();
@@ -109,6 +109,9 @@ namespace NetExplorerServer
                             break;
                         case "RENAMEFOLDER":
                             commandResponse = RenameFolder(commandStringsArray[1].Replace('|',' '), commandStringsArray[2].Replace('|',' ')); 
+                            break;
+                        case "RENAMEFILE":
+                            commandResponse = RenameFile(commandStringsArray[1].Replace('|', ' '), commandStringsArray[2].Replace('|', ' '));
                             break;
                         default:
                             commandResponse = "502 command not implemented\n";
@@ -292,6 +295,11 @@ namespace NetExplorerServer
         private string RenameFolder(string path, string newName)
         {
             return _directoriesBackend.RenameCurrentFolder(path, newName);
+        }
+
+        private string RenameFile(string path, string newFileName)
+        {
+            return _directoriesBackend.RemameFile(path, newFileName);
         }
     }
 }
