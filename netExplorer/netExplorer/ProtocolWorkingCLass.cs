@@ -196,5 +196,14 @@ namespace netExplorer
             GetList();
             CommandStream.Flush();
         }
+
+        public void UpFolder()
+        {
+            CommandStream.WriteLine("CDUP");
+            _answer = GetAnswer();
+            CommandStream.Flush();
+            GetList();
+            CommandStream.Flush();
+        }
     }
 }
