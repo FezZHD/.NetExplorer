@@ -25,6 +25,9 @@ namespace netExplorer
         private ProtocolWorkingClass _currentProtocol;
         public static MainClientWindow TransferWindow { get; private set; }
         public static ListView TranferView { get; private set; }
+        public static string NewName { get; set; }
+        public static bool IsOk { private get; set; }
+
 
         public MainClientWindow()
         {
@@ -58,6 +61,13 @@ namespace netExplorer
 
         private void Rename_OnClick(object sender, RoutedEventArgs e)
         {
+            RenameForm renameForm = new RenameForm();
+            renameForm.ShowDialog();
+            if (IsOk)
+            {
+               _currentProtocol.Rename(DataView.SelectedIndex);
+            }
+            DataView.Items.Refresh();
         }
 
         private void NewFolder_OnClick(object sender, RoutedEventArgs e)
@@ -70,6 +80,20 @@ namespace netExplorer
             if (_currentProtocol != null)
             {
                 _currentProtocol.Disconnect();
+            }
+        }
+
+
+        private void DataView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            DependencyObject originalDependencyObject = (DependencyObject) e.OriginalSource;
+            while ((originalDependencyObject != null) && !(originalDependencyObject is ListViewItem))
+            {
+                originalDependencyObject = VisualTreeHelper.GetParent(originalDependencyObject);
+            }
+
+            if (originalDependencyObject != null)
+            {
             }
         }
     }

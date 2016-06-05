@@ -68,6 +68,9 @@
     </ApplicationDefinition>
     <Compile Include="ListItems.cs" />
     <Compile Include="ProtocolWorkingClass.cs" />
+    <Compile Include="RenameForm.xaml.cs">
+      <DependentUpon>RenameForm.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainClientWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -79,6 +82,10 @@
     <Compile Include="MainClientWindow.xaml.cs">
       <DependentUpon>MainClientWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="RenameForm.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Themes\MetroDark\MetroDark.MSControls.Core.Implicit.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

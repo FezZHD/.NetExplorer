@@ -76,6 +76,7 @@ namespace netExplorer
 
         private void GetList()
         {
+            TcpClient listClient;
             CommandStream.WriteLine("LIST");
             CommandStream.Flush();
             _answer = GetAnswer();
@@ -84,24 +85,27 @@ namespace netExplorer
             {
                 _tcpListiner = new TcpListener(20);
                 _tcpListiner.Start();
+               
+                listClient = _tcpListiner.AcceptTcpClient();
             }
             catch (Exception)
             {
-                MessageBox.Show(@"Ошибка подключения");
+                _tcpListiner.Stop();
+                _listThread.Abort();
                 return;
             }
             #pragma warning restore 618
-            TcpClient listClient = _tcpListiner.AcceptTcpClient();
             NetworkStream listNetwork = listClient.GetStream();
             StreamReader listWriter = new StreamReader(listNetwork);
             ListWorking(listWriter);
             _answer = GetAnswer();
             _tcpListiner.Stop();
+            listClient.Close();
             MainClientWindow.TransferWindow.Dispatcher.Invoke(new ThreadStart(delegate
             {
                 MainClientWindow.TranferView.ItemsSource = List;
-            }));
-            _listThread.Abort();
+            }));      
+            _listThread.Abort();     
         }
 
         private void ListWorking(StreamReader stream)
@@ -135,7 +139,7 @@ namespace netExplorer
         }
         private void DeleteSmth(string command ,int index)
         {
-            CommandStream.WriteLine("{0} {1}",command, List[index].Path);
+            CommandStream.WriteLine("{0} {1}",command, List[index].Path.Replace(' ','|'));
             _answer = GetAnswer();
             CommandStream.Flush();
             GetList();
@@ -145,6 +149,23 @@ namespace netExplorer
         public void Disconnect()
         {
             CurrentTcpClient.Close();
+        }
+
+        public void Rename(int index)
+        {
+            if (List[index].Type.Equals("DIR"))
+            {
+                RenameSmth("RENAMEFOLDER",index,MainClientWindow.NewName);
+            }
+        }
+
+        private void RenameSmth(string command, int index, string newName)
+        {
+            CommandStream.WriteLine("{0} {1} {2}", command, List[index].Path.Replace(' ','|'), newName.Replace(' ','|'));
+            _answer = GetAnswer();
+            CommandStream.Flush();
+            GetList();
+            CommandStream.Flush();
         }
     }
 }
