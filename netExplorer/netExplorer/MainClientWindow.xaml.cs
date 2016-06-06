@@ -31,7 +31,9 @@ namespace netExplorer
         public static bool IsOk { private get; set; }
         public static string StringDownloadPath { get; private set; }
         public static Thread UploadThread, DownloadThread;
-        public static List<string> UploadList = new List<string>() , DownloadList = new List<string>(); 
+        public static List<DownloadList> DownloadList = new List<DownloadList>();
+        public static List<UploadList> UploadList = new List<UploadList>();
+        public static string CurrentDir { get; set; }
 
 
         public MainClientWindow()
@@ -137,5 +139,26 @@ namespace netExplorer
                 StringDownloadPath = folderBrowser.SelectedPath;
             }
         }
+
+        private void Upload_Click(object sender, RoutedEventArgs e)
+        {
+            string uploadPath = CurrentDir;
+            OpenFileDialog uploadFileDialog = new OpenFileDialog();
+            if (uploadFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                string newFileName = uploadFileDialog.SafeFileName;
+                UploadList.Add(new UploadList(uploadPath, newFileName, uploadFileDialog.FileName));
+                UploadView.ItemsSource = UploadList;
+                UploadView.Items.Refresh();
+                if (!_currentProtocol.IsUploading)
+                {
+                    _currentProtocol.IsUploading = true;
+                    UploadThread = new Thread(_currentProtocol.UploadFile);
+                    UploadThread.Start();
+                }
+            }
+            
+        }
+
     }
 }

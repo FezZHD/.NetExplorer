@@ -28,6 +28,7 @@ namespace netExplorer
         private const int BufferSize = 4096;
         private bool IsDownload { get; set; }
         private int CurrentIndex { get; set; }
+        public bool IsUploading { get; set; }
 
         public ProtocolWorkingClass(string server, string login, string password)
         {
@@ -105,9 +106,18 @@ namespace netExplorer
             MainClientWindow.TransferWindow.Dispatcher.Invoke(new ThreadStart(delegate
             {
                 MainClientWindow.TranferView.ItemsSource = List;
-            }));               
+            }));
+            CommandStream.WriteLine("PWD");
+            CommandStream.Flush();
+            _answer = GetAnswer();
+            while (_answer.Contains("226"))
+            {
+                CommandStream.WriteLine("PWD");
+                CommandStream.Flush();
+                _answer = GetAnswer().Replace('|', ' ');
+            }
+            MainClientWindow.CurrentDir = _answer;
             _listThread.Abort();
-
         }
 
         private void ListWorking(StreamReader stream)
@@ -144,7 +154,6 @@ namespace netExplorer
             CommandStream.WriteLine("{0} {1}",command, List[index].Path.Replace(' ','|'));
             CommandStream.Flush();
             GetList();
-            _answer = GetAnswer();
             CommandStream.Flush();
         }
 
@@ -170,7 +179,6 @@ namespace netExplorer
             CommandStream.WriteLine("{0} {1} {2}", command, List[index].Path.Replace(' ','|'), newName.Replace(' ','|'));
             CommandStream.Flush();
             GetList(); 
-            _answer = GetAnswer();
             CommandStream.Flush();
         }
 
@@ -184,7 +192,7 @@ namespace netExplorer
             else
             {
                 CurrentIndex = index;
-                MainClientWindow.DownloadList.Add(List[index].Path); 
+                MainClientWindow.DownloadList.Add(new DownloadList(List[index].Path,List[index].Name)); 
                 MainClientWindow.TransferWindow.DowloadView.ItemsSource = MainClientWindow.DownloadList;
                 MainClientWindow.TransferWindow.DowloadView.Items.Refresh();
                 if (!IsDownload)
@@ -198,11 +206,9 @@ namespace netExplorer
         
         private void ChangeDirDown(string path)
         {
-            CommandStream.WriteLine("CWD {0}",path.Replace('|',' '));
-            
+            CommandStream.WriteLine("CWD {0}",path.Replace('|',' '));         
             CommandStream.Flush();
             GetList();
-            _answer = GetAnswer();
             CommandStream.Flush();
         }
 
@@ -212,7 +218,6 @@ namespace netExplorer
             CommandStream.WriteLine("MKD {0}", newName);    
             CommandStream.Flush();
             GetList(); 
-            _answer = GetAnswer();
             CommandStream.Flush();
         }
 
@@ -221,7 +226,6 @@ namespace netExplorer
             CommandStream.WriteLine("CDUP");
             CommandStream.Flush();
             GetList(); 
-            _answer = GetAnswer();
             CommandStream.Flush();
         }
 
@@ -280,7 +284,7 @@ namespace netExplorer
         }
 
 
-        public void DownloadFile()
+        private void DownloadFile()
         {
             TcpClient dataClient;
             NetworkStream dataNetworkStream;
@@ -288,11 +292,11 @@ namespace netExplorer
             int index = 0;
             while (MainClientWindow.DownloadList.Count != 0)
             {
-               string currentPath =  MainClientWindow.DownloadList[index]; 
+                string currentPath =  MainClientWindow.DownloadList[index].DownloadPath; 
                 CommandStream.WriteLine("RETR {0} {1}", currentPath.Replace(' ', '|'), 22);
                 CommandStream.Flush();
                 _answer = GetAnswer();
-                string newPath = MainClientWindow.StringDownloadPath + "\\" + List[CurrentIndex].Name;
+                string newPath = MainClientWindow.StringDownloadPath + "\\" + MainClientWindow.DownloadList[index].FileName;
                 #pragma warning disable 618
                 dataListener = new TcpListener(22);
                 #pragma warning restore 618
@@ -303,7 +307,7 @@ namespace netExplorer
                 _answer = GetAnswer();                
                 dataListener.Stop();
                 dataClient.Close();
-                MainClientWindow.DownloadList.Remove(currentPath);
+                MainClientWindow.DownloadList.Remove(MainClientWindow.DownloadList[index]);
                 MainClientWindow.TransferWindow.Dispatcher.Invoke(new ThreadStart(delegate
                 {
                     MainClientWindow.TransferWindow.DowloadView.Items.Refresh();
@@ -316,7 +320,35 @@ namespace netExplorer
 
         public void UploadFile()
         {
-            
+            TcpClient dataClient;
+            NetworkStream dataNetworkStream;
+            TcpListener dataListener;
+            int index = 0;
+            while (MainClientWindow.UploadList.Count != 0)
+            {
+                CommandStream.WriteLine("STOR {0} {1}", MainClientWindow.UploadList[0].DownloadPath + "\\" +MainClientWindow.UploadList[0].FileName, 23);
+                CommandStream.Flush();
+                _answer = GetAnswer();
+                #pragma warning disable 618
+                dataListener = new TcpListener(23);
+                #pragma warning restore 618
+                dataListener.Start();
+                dataClient = dataListener.AcceptTcpClient();
+                dataNetworkStream = dataClient.GetStream();
+                SendFile(MainClientWindow.UploadList[0].LocalFilePath, dataNetworkStream);
+                _answer = GetAnswer();
+                dataListener.Stop();
+                dataClient.Close();
+                MainClientWindow.UploadList.Remove(MainClientWindow.UploadList[0]);
+                MainClientWindow.TransferWindow.Dispatcher.Invoke(new ThreadStart(delegate
+                {
+                    MainClientWindow.TransferWindow.UploadView.Items.Refresh();
+                    MainClientWindow.TransferWindow.DataView.Items.Refresh();
+                }));
+            }
+            IsUploading = false;
+            MainClientWindow.UploadList.Clear();
+            MainClientWindow.UploadThread.Abort();   
         }
     }
 }

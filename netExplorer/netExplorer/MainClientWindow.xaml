@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:netExplorer"
         mc:Ignorable="d"
-        Title=".Net Client" Height="590" Width="800" MinWidth="800" MinHeight="600" Background="#FF3A3636" Closed="MainWindow_Closed">
+        Title=".Net Client" Height="590" Width="800" MinWidth="800" MinHeight="600" Background="#FF3A3636" Closed="MainWindow_Closed" Icon="icon/1465241870_document.ico">
     <Grid x:Name="MainGrid" Margin="0,0,0,0">
         <Grid Name="ControlGrid" Width="199" MinHeight="385" HorizontalAlignment="Left" Margin="0,0,0,185">
             <Label x:Name="LoginLabel" Content="Логин" HorizontalAlignment="Left" Margin="10,81,0,0" VerticalAlignment="Top" Background="{x:Null}" Foreground="White"/>
@@ -53,10 +53,31 @@
         <Grid Name="TabGrid" HorizontalAlignment="Stretch" Margin="0,390,0,0" VerticalAlignment="Bottom">
             <TabControl Name="FileTab" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" MinHeight="180" MaxHeight="180" Height="175">
                 <TabItem Name="UploadTab" Header="Файлы загрузки на сервер" Margin="0,0,-4,-3">
-                    <ListView Name="UploadView" ItemsSource="{Binding UploadList}"/>
+                    <ListView Name="UploadView">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <WrapPanel>
+                                    <TextBlock Text="{Binding LocalFilePath}"></TextBlock>
+                                </WrapPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                        <ListView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Закачать файл" Click="Upload_Click"></MenuItem>
+                            </ContextMenu>
+                        </ListView.ContextMenu>
+                     </ListView>   
                 </TabItem>
                 <TabItem Name="DownloadTab" Header="Файлы скачивания">
-                    <ListView Name="DowloadView" ItemsSource="{Binding DownloadList}"/>
+                    <ListView Name="DowloadView">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <WrapPanel>
+                                <TextBlock Text="{Binding DownloadPath}"></TextBlock>
+                            </WrapPanel>
+                        </DataTemplate>
+                        </ListView.ItemTemplate>
+                        </ListView>
                 </TabItem>
             </TabControl>
         </Grid>
