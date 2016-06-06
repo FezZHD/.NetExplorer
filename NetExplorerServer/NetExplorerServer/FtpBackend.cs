@@ -16,7 +16,6 @@ namespace NetExplorerServer
         public static NetworkStream DataNetworkStream;
         private StreamWriter _commandStreamWriter;
         private StreamReader _commadStreamReader;
-        private const ushort ClientPort = 20;
         private DirectoriesBackend _directoriesBackend;
         private Thread _fileThread;
 
@@ -76,7 +75,7 @@ namespace NetExplorerServer
                             commandResponse = HandlePwd();
                             break;
                         case "LIST":
-                            commandResponse = HandleList();
+                            commandResponse = HandleList(commandStringsArray[1]);
                             break;
                         case "CWD":
                             commandResponse = HandleCwd(arguments.Replace('|', ' '));
@@ -94,10 +93,10 @@ namespace NetExplorerServer
                             commandResponse = HandleDele(arguments.Replace('|',' '));
                             break;
                         case "RETR":
-                            commandResponse = HandleRetr(arguments);
+                            commandResponse = HandleRetr(commandStringsArray[1].Replace('|', ' '),commandStringsArray[2]);
                             break;
                         case "STOR":
-                            commandResponse = HandleStor(arguments);
+                            commandResponse = HandleStor(commandStringsArray[1].Replace('|', ' '),commandStringsArray[2]);
                             //todo: update thread working for stor and retr
                             break;
                         case "NOOP":
@@ -187,17 +186,19 @@ namespace NetExplorerServer
             return "257 \"" + _directoriesBackend.CurrentDirectory + "\" is currentd directory";
         }
 
-        private string HandleList()
+        private string HandleList(string port)
         {
+            ushort currentPort = Convert.ToUInt16(port);
             _commandStreamWriter.WriteLine("150 ready to send\n");
             _commandStreamWriter.Flush();
-            DataNetworkStream = CreateNetworkStream();
+            DataNetworkStream = CreateNetworkStream(currentPort);
             _directoriesBackend.GetList(DataNetworkStream);
             return "226 transfer complete";
         }
 
-        private NetworkStream CreateNetworkStream()
+        private NetworkStream CreateNetworkStream(ushort port)
         {
+
             string endPoint = _commandClient.Client.RemoteEndPoint.ToString();
             string ipAddress = endPoint.Split(':')[0];
             if ((_dataClient != null) && (_dataClient.Connected))
@@ -206,7 +207,7 @@ namespace NetExplorerServer
             }
             try
             {
-                _dataClient = new TcpClient(ipAddress ,ClientPort);
+                _dataClient = new TcpClient(ipAddress , port);
             }
             catch (Exception)
             {
@@ -237,12 +238,13 @@ namespace NetExplorerServer
             return "250 directory changed";
         }
 
-        private string HandleRetr(string path)
+        private string HandleRetr(string path, string port)
         {
+            ushort currentPort = Convert.ToUInt16(port);
             string filePath = path;
             _commandStreamWriter.WriteLine("150 ready to send\n");
             _commandStreamWriter.Flush();
-            DataNetworkStream = CreateNetworkStream();
+            DataNetworkStream = CreateNetworkStream(currentPort);
             _fileThread = new Thread(
                 () =>
                     _directoriesBackend.Response = _directoriesBackend.SendFile(filePath)
@@ -252,12 +254,13 @@ namespace NetExplorerServer
             return _directoriesBackend.Response;
         }
 
-        private string HandleStor(string path)
+        private string HandleStor(string path, string port)
         {
             string filePath = path;
+            ushort currentPort = Convert.ToUInt16(port);
             _commandStreamWriter.WriteLine("150 ready to recieve\n");
             _commandStreamWriter.Flush();
-            DataNetworkStream = CreateNetworkStream();
+            DataNetworkStream = CreateNetworkStream(currentPort);
             _fileThread = new Thread(
                 () =>
                 _directoriesBackend.Response = _directoriesBackend.GetFile(filePath)

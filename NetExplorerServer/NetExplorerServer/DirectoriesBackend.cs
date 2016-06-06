@@ -47,12 +47,11 @@ namespace NetExplorerServer
             {
                 currentFile.Close();
             }
-            Response = "226 uploading complete";
             if (FtpBackend.DataNetworkStream == null)
             {
                 return "";
             }
-
+            Response = "226 uploading complete";
             FtpBackend.DataNetworkStream.Close();
             return Response;
         }
@@ -69,11 +68,14 @@ namespace NetExplorerServer
                 lock (FtpBackend.DataNetworkStream)
                 {
                     int count;
-                    while ((count = sendFileStream.Read(fileBuffer, 0, fileBuffer.Length)) > 0 && (FtpBackend.DataNetworkStream != null))
-                    {
+                   
                         try
                         {
-                            FtpBackend.DataNetworkStream.Write(fileBuffer, 0, count);
+                            while ((count = sendFileStream.Read(fileBuffer, 0, fileBuffer.Length)) > 0 &&
+                                   (FtpBackend.DataNetworkStream != null))
+                            {
+                                FtpBackend.DataNetworkStream.Write(fileBuffer, 0, count);
+                            }
                         }
                         catch (IOException)
                         {                           
@@ -83,7 +85,6 @@ namespace NetExplorerServer
                         {
                             sendFileStream.Close();
                         }
-                    }
                     Response = "226 sending complete";
                 }
 
