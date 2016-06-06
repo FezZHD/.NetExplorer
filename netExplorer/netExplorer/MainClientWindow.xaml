@@ -35,7 +35,7 @@
                         <MenuItem Header="Обновить" Click="Refresh_OnClick" Command="{Binding Path=DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"></MenuItem>
                         <MenuItem Header="Переименовать" Click="Rename_OnClick" Command="{Binding Path=DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"></MenuItem>
                         <MenuItem Header="Новая папка" Click="NewFolder_OnClick" Command="{Binding Path=DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"></MenuItem>
-                        <MenuItem Header="Папка вверх" Click="FolderUp_OnClick"></MenuItem>
+                        <MenuItem Header="Папка вверх" Click="FolderUp_OnClick" Command="{Binding Path=DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"></MenuItem>
                     </ContextMenu>
                 </ListView.Resources>
                 <ListView.ItemContainerStyle>
@@ -53,10 +53,10 @@
         <Grid Name="TabGrid" HorizontalAlignment="Stretch" Margin="0,390,0,0" VerticalAlignment="Bottom">
             <TabControl Name="FileTab" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" MinHeight="180" MaxHeight="180" Height="175">
                 <TabItem Name="UploadTab" Header="Файлы загрузки на сервер" Margin="0,0,-4,-3">
-                    <Grid Background="#FFE5E5E5"/>
+                    <ListView Name="UploadView" ItemsSource="{Binding UploadList}"/>
                 </TabItem>
                 <TabItem Name="DownloadTab" Header="Файлы скачивания">
-                    <Grid Background="#FFE5E5E5"/>
+                    <ListView Name="DowloadView" ItemsSource="{Binding DownloadList}"/>
                 </TabItem>
             </TabControl>
         </Grid>

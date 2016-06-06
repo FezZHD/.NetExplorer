@@ -25,6 +25,9 @@ namespace netExplorer
         private TcpListener _tcpListiner;
         public List<ListItems> List = new List<ListItems>();
         private Thread _listThread;
+        private const int BufferSize = 4096;
+        private bool IsDownload { get; set; }
+        private int CurrentIndex { get; set; }
 
         public ProtocolWorkingClass(string server, string login, string password)
         {
@@ -70,16 +73,17 @@ namespace netExplorer
 
         private string GetAnswer()
         {
+            CommandReaderStream.DiscardBufferedData();
             string returnCommand = CommandReaderStream.ReadLine();
             return returnCommand;
         }
 
         public void GetList()
-        {
-            TcpClient listClient;
-            CommandStream.WriteLine("LIST");
+        {      
+            CommandStream.WriteLine("LIST {0}",20);
             CommandStream.Flush();
             _answer = GetAnswer();
+            TcpClient listClient;
             #pragma warning disable 618
             try
             {
@@ -101,8 +105,9 @@ namespace netExplorer
             MainClientWindow.TransferWindow.Dispatcher.Invoke(new ThreadStart(delegate
             {
                 MainClientWindow.TranferView.ItemsSource = List;
-            }));      
-            _listThread.Abort();     
+            }));               
+            _listThread.Abort();
+
         }
 
         private void ListWorking(StreamReader stream)
@@ -137,9 +142,9 @@ namespace netExplorer
         private void DeleteSmth(string command ,int index)
         {
             CommandStream.WriteLine("{0} {1}",command, List[index].Path.Replace(' ','|'));
-            _answer = GetAnswer();
             CommandStream.Flush();
             GetList();
+            _answer = GetAnswer();
             CommandStream.Flush();
         }
 
@@ -163,9 +168,9 @@ namespace netExplorer
         private void RenameSmth(string command, int index, string newName)
         {
             CommandStream.WriteLine("{0} {1} {2}", command, List[index].Path.Replace(' ','|'), newName.Replace(' ','|'));
-            _answer = GetAnswer();
             CommandStream.Flush();
-            GetList();
+            GetList(); 
+            _answer = GetAnswer();
             CommandStream.Flush();
         }
 
@@ -174,36 +179,144 @@ namespace netExplorer
         {
             if (List[index].Type.Equals("DIR"))
             {
-                ChangeDirUp(List[index].Path);
+                ChangeDirDown(List[index].Path);
+            }
+            else
+            {
+                CurrentIndex = index;
+                MainClientWindow.DownloadList.Add(List[index].Path); 
+                MainClientWindow.TransferWindow.DowloadView.ItemsSource = MainClientWindow.DownloadList;
+                MainClientWindow.TransferWindow.DowloadView.Items.Refresh();
+                if (!IsDownload)
+                {
+                    IsDownload = true;
+                    MainClientWindow.DownloadThread = new Thread(DownloadFile);
+                    MainClientWindow.DownloadThread.Start();
+                }
             }
         }
         
-        private void ChangeDirUp(string path)
+        private void ChangeDirDown(string path)
         {
             CommandStream.WriteLine("CWD {0}",path.Replace('|',' '));
-            _answer = GetAnswer();
+            
             CommandStream.Flush();
             GetList();
+            _answer = GetAnswer();
             CommandStream.Flush();
         }
 
 
         public void MakeDir(string newName)
         {
-            CommandStream.WriteLine("MKD {0}", newName);
-            _answer = GetAnswer();
+            CommandStream.WriteLine("MKD {0}", newName);    
             CommandStream.Flush();
-            GetList();
+            GetList(); 
+            _answer = GetAnswer();
             CommandStream.Flush();
         }
 
         public void UpFolder()
         {
             CommandStream.WriteLine("CDUP");
+            CommandStream.Flush();
+            GetList(); 
             _answer = GetAnswer();
             CommandStream.Flush();
-            GetList();
-            CommandStream.Flush();
+        }
+
+
+
+        private void SendFile(string path, NetworkStream dataNetworkStream)
+        {
+            if (File.Exists(path))
+            {
+                FileStream sendFileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+                byte[] fileBuffer = new byte[BufferSize];
+
+                try
+                {
+                    int count;
+                    while ((count = sendFileStream.Read(fileBuffer, 0, fileBuffer.Length)) > 0 &&
+                           (dataNetworkStream != null))
+                    {
+                        dataNetworkStream.Write(fileBuffer, 0, count);
+                    }
+                }
+                catch (IOException)
+                {
+
+                }
+                finally
+                {
+                    sendFileStream.Close();
+                }
+                dataNetworkStream.Close();
+            }
+        }
+
+
+        private void GetFile(string path, NetworkStream dataNetworkStream)
+        {
+            FileStream newFile = new FileStream(path, FileMode.Create, FileAccess.Write);
+            byte[] buffer = new byte[BufferSize];
+            try
+            {
+                int count;
+                while ((count = dataNetworkStream.Read(buffer, 0, buffer.Length)) > 0 && (dataNetworkStream != null))
+                {
+                    newFile.Write(buffer, 0 , count);
+                }
+            }
+            catch (IOException)
+            {
+
+            }
+            finally
+            {
+                newFile.Close();
+            }
+            dataNetworkStream.Close();
+        }
+
+
+        public void DownloadFile()
+        {
+            TcpClient dataClient;
+            NetworkStream dataNetworkStream;
+            TcpListener dataListener;
+            int index = 0;
+            while (MainClientWindow.DownloadList.Count != 0)
+            {
+               string currentPath =  MainClientWindow.DownloadList[index]; 
+                CommandStream.WriteLine("RETR {0} {1}", currentPath.Replace(' ', '|'), 22);
+                CommandStream.Flush();
+                _answer = GetAnswer();
+                string newPath = MainClientWindow.StringDownloadPath + "\\" + List[CurrentIndex].Name;
+                #pragma warning disable 618
+                dataListener = new TcpListener(22);
+                #pragma warning restore 618
+                dataListener.Start();
+                dataClient = dataListener.AcceptTcpClient();
+                dataNetworkStream = dataClient.GetStream();
+                GetFile(newPath, dataNetworkStream);
+                _answer = GetAnswer();                
+                dataListener.Stop();
+                dataClient.Close();
+                MainClientWindow.DownloadList.Remove(currentPath);
+                MainClientWindow.TransferWindow.Dispatcher.Invoke(new ThreadStart(delegate
+                {
+                    MainClientWindow.TransferWindow.DowloadView.Items.Refresh();
+                }));
+            }
+            IsDownload = false;
+            MainClientWindow.DownloadList.Clear();
+            MainClientWindow.DownloadThread.Abort();          
+        }
+
+        public void UploadFile()
+        {
+            
         }
     }
 }

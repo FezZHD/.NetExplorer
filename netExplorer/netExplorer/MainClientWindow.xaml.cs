@@ -30,6 +30,8 @@ namespace netExplorer
         public static string NewName { get; set; }
         public static bool IsOk { private get; set; }
         public static string StringDownloadPath { get; private set; }
+        public static Thread UploadThread, DownloadThread;
+        public static List<string> UploadList = new List<string>() , DownloadList = new List<string>(); 
 
 
         public MainClientWindow()
