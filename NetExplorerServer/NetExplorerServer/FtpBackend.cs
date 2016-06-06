@@ -11,7 +11,6 @@ namespace NetExplorerServer
     internal class FtpBackend
     {
         private TcpClient _commandClient;
-        private TcpClient   _dataClient;
         private readonly NetworkStream _commandNetworkStream;
         public static NetworkStream DataNetworkStream;
         private StreamWriter _commandStreamWriter;
@@ -178,43 +177,41 @@ namespace NetExplorerServer
 
 
         private string HandlePwd()
-        {
-            if (_directoriesBackend == null)
-            {
-                _directoriesBackend = new DirectoriesBackend();
-            }
+        {   
+            _commandStreamWriter.WriteLine(_directoriesBackend.CurrentDirectory.Replace(' ','|'));
             return "257 \"" + _directoriesBackend.CurrentDirectory + "\" is currentd directory";
         }
 
         private string HandleList(string port)
         {
+            TcpClient listClient = null;
             ushort currentPort = Convert.ToUInt16(port);
             _commandStreamWriter.WriteLine("150 ready to send\n");
             _commandStreamWriter.Flush();
-            DataNetworkStream = CreateNetworkStream(currentPort);
+            DataNetworkStream = CreateNetworkStream(listClient,currentPort);
             _directoriesBackend.GetList(DataNetworkStream);
             return "226 transfer complete";
         }
 
-        private NetworkStream CreateNetworkStream(ushort port)
+        private NetworkStream CreateNetworkStream(TcpClient currentClient, ushort port)
         {
 
             string endPoint = _commandClient.Client.RemoteEndPoint.ToString();
             string ipAddress = endPoint.Split(':')[0];
-            if ((_dataClient != null) && (_dataClient.Connected))
+            if ((currentClient != null) && (currentClient.Connected))
             {
-                _dataClient.Close();
+                currentClient.Close();
             }
             try
             {
-                _dataClient = new TcpClient(ipAddress , port);
+                currentClient = new TcpClient(ipAddress , port);
             }
             catch (Exception)
             {
                 Console.WriteLine("Происходит отладка или ошибка подключение. Отключение клиента");
                 throw;
             }
-            return _dataClient.GetStream();
+            return currentClient.GetStream();
         }
 
 
@@ -240,11 +237,12 @@ namespace NetExplorerServer
 
         private string HandleRetr(string path, string port)
         {
+            TcpClient RetrClient = null;
             ushort currentPort = Convert.ToUInt16(port);
             string filePath = path;
             _commandStreamWriter.WriteLine("150 ready to send\n");
             _commandStreamWriter.Flush();
-            DataNetworkStream = CreateNetworkStream(currentPort);
+            DataNetworkStream = CreateNetworkStream(RetrClient,currentPort);
             _fileThread = new Thread(
                 () =>
                     _directoriesBackend.Response = _directoriesBackend.SendFile(filePath)
@@ -256,11 +254,12 @@ namespace NetExplorerServer
 
         private string HandleStor(string path, string port)
         {
+            TcpClient storClient= null;
             string filePath = path;
             ushort currentPort = Convert.ToUInt16(port);
             _commandStreamWriter.WriteLine("150 ready to recieve\n");
             _commandStreamWriter.Flush();
-            DataNetworkStream = CreateNetworkStream(currentPort);
+            DataNetworkStream = CreateNetworkStream(storClient,currentPort);
             _fileThread = new Thread(
                 () =>
                 _directoriesBackend.Response = _directoriesBackend.GetFile(filePath)
