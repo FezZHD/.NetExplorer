@@ -323,7 +323,6 @@ namespace netExplorer
             TcpClient dataClient;
             NetworkStream dataNetworkStream;
             TcpListener dataListener;
-            int index = 0;
             while (MainClientWindow.UploadList.Count != 0)
             {
                 CommandStream.WriteLine("STOR {0} {1}", MainClientWindow.UploadList[0].DownloadPath + "\\" +MainClientWindow.UploadList[0].FileName, 23);

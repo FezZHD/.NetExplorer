@@ -142,22 +142,24 @@ namespace netExplorer
 
         private void Upload_Click(object sender, RoutedEventArgs e)
         {
+            if ((_currentProtocol.CurrentTcpClient.Connected) && (_currentProtocol != null))
+            { 
             string uploadPath = CurrentDir;
             OpenFileDialog uploadFileDialog = new OpenFileDialog();
-            if (uploadFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                string newFileName = uploadFileDialog.SafeFileName;
-                UploadList.Add(new UploadList(uploadPath, newFileName, uploadFileDialog.FileName));
-                UploadView.ItemsSource = UploadList;
-                UploadView.Items.Refresh();
-                if (!_currentProtocol.IsUploading)
+                if (uploadFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    _currentProtocol.IsUploading = true;
-                    UploadThread = new Thread(_currentProtocol.UploadFile);
-                    UploadThread.Start();
+                    string newFileName = uploadFileDialog.SafeFileName;
+                    UploadList.Add(new UploadList(uploadPath, newFileName, uploadFileDialog.FileName));
+                    UploadView.ItemsSource = UploadList;
+                    UploadView.Items.Refresh();
+                    if (!_currentProtocol.IsUploading)
+                    {
+                        _currentProtocol.IsUploading = true;
+                        UploadThread = new Thread(_currentProtocol.UploadFile);
+                        UploadThread.Start();
+                    }
                 }
-            }
-            
+            }  
         }
 
     }
