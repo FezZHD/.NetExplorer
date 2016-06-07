@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using ListView = System.Windows.Controls.ListView;
 using ListViewItem = System.Windows.Controls.ListViewItem;
+using MessageBox = System.Windows.MessageBox;
 using Path = System.IO.Path;
 
 namespace netExplorer
@@ -47,9 +48,16 @@ namespace netExplorer
 
         private void EnterButton_Click(object sender, RoutedEventArgs e)
         {
-             ClientDisconnect();
-             _currentProtocol = new ProtocolWorkingClass(Addres.Text,Login.Text,Password.Password);
-             _currentProtocol.Connect();
+            if (Login.Text.Trim() != String.Empty)
+            {
+                ClientDisconnect();
+                _currentProtocol = new ProtocolWorkingClass(Addres.Text, Login.Text, Password.Password);
+                _currentProtocol.Connect();
+            }
+            else
+            {
+                MessageBox.Show(@"Введите логин");
+            }
         }
 
         private void MainWindow_Closed(object sender, EventArgs e)
