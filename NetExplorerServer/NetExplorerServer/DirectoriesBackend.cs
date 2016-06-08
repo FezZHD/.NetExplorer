@@ -104,7 +104,16 @@ namespace NetExplorerServer
             {
                 NewLine = "\n"
             };
-            IEnumerable<string> directoriesEnumerable = Directory.EnumerateDirectories(CurrentDirectory);
+            IEnumerable<string> directoriesEnumerable;
+            try
+            {
+                directoriesEnumerable = Directory.EnumerateDirectories(CurrentDirectory);
+            }
+            catch (Exception)
+            {
+                _streamWriter.Close();
+                return;
+            }           
             foreach (string directory in directoriesEnumerable)
             {
                 DirectoryInfo currentDirectoryInfo = new DirectoryInfo(directory);
