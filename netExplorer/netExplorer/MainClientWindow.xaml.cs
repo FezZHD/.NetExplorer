@@ -121,8 +121,11 @@ namespace netExplorer
 
         private void Refresh_OnClick(object sender, RoutedEventArgs e)
         {
-            _currentProtocol.GetList();
-            DataView.Items.Refresh();
+            if ((_currentProtocol != null) && (_currentProtocol.CurrentTcpClient.Connected))
+            {
+                _currentProtocol.GetList();
+                DataView.Items.Refresh();
+            }
         }
 
 

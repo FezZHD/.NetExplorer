@@ -46,6 +46,7 @@
                 <ListView.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Папка вверх" Click="FolderUp_OnClick"></MenuItem>
+                        <MenuItem Header="Обновить" Click="Refresh_OnClick"></MenuItem>
                     </ContextMenu>
                 </ListView.ContextMenu>
             </ListView>

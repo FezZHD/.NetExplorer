@@ -325,7 +325,7 @@ namespace netExplorer
             TcpListener dataListener;
             while (MainClientWindow.UploadList.Count != 0)
             {
-                CommandStream.WriteLine("STOR {0} {1}", MainClientWindow.UploadList[0].DownloadPath + "\\" +MainClientWindow.UploadList[0].FileName, 23);
+                CommandStream.WriteLine("STOR {0} {1}", MainClientWindow.UploadList[0].DownloadPath.Replace(' ','|') + "\\" +MainClientWindow.UploadList[0].FileName.Replace(' ','|'), 23);
                 CommandStream.Flush();
                 _answer = GetAnswer();
                 #pragma warning disable 618
