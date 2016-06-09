@@ -85,13 +85,16 @@ namespace netExplorer
 
         private void NewFolder_OnClick(object sender, RoutedEventArgs e)
         {
-            RenameForm newFolderForm = new RenameForm();
-            newFolderForm.ShowDialog();
-            if (IsOk)
+            if (_currentProtocol.CurrentTcpClient.Connected)
             {
-                _currentProtocol.MakeDir(NewName);
+                RenameForm newFolderForm = new RenameForm();
+                newFolderForm.ShowDialog();
+                if (IsOk)
+                {
+                    _currentProtocol.MakeDir(NewName);
+                }
+                DataView.Items.Refresh();
             }
-            DataView.Items.Refresh();
         }
 
         private void ClientDisconnect()
@@ -156,7 +159,7 @@ namespace netExplorer
             if ((_currentProtocol.CurrentTcpClient.Connected) && (_currentProtocol != null))
             { 
             string uploadPath = CurrentDir;
-            OpenFileDialog uploadFileDialog = new OpenFileDialog();
+            OpenFileDialog uploadFileDialog = new OpenFileDialog {Multiselect = false};
                 if (uploadFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     string newFileName = uploadFileDialog.SafeFileName;
