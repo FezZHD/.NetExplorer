@@ -148,7 +148,7 @@ namespace netExplorer
 
         private void Upload_Click(object sender, RoutedEventArgs e)
         {
-            if ((_currentProtocol.CurrentTcpClient.Connected) && (_currentProtocol != null))
+            if ((_currentProtocol != null) && (_currentProtocol.CurrentTcpClient.Connected))
             { 
             string uploadPath = CurrentDir;
             OpenFileDialog uploadFileDialog = new OpenFileDialog {Multiselect = false};
